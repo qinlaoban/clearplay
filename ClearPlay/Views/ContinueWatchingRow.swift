@@ -4,7 +4,6 @@ import SwiftUI
 struct ContinueWatchingRow: View {
     let items: [MediaItem]
     var onPlay: (MediaItem) -> Void
-    var onOpen: (MediaItem) -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -15,7 +14,10 @@ struct ContinueWatchingRow: View {
             ScrollView(.horizontal, showsIndicators: false) {
                 LazyHStack(spacing: 14) {
                     ForEach(items) { item in
-                        card(for: item)
+                        NavigationLink(value: item) {
+                            card(for: item)
+                        }
+                        .buttonStyle(.plain)
                     }
                 }
                 .padding(.vertical, 2)
@@ -30,16 +32,6 @@ struct ContinueWatchingRow: View {
                     .frame(width: 260, height: 146)
                     .clipShape(RoundedRectangle(cornerRadius: 8))
 
-                if let remaining = remainingLabel(for: item) {
-                    Text(remaining)
-                        .font(.system(size: 11, weight: .medium).monospacedDigit())
-                        .padding(.horizontal, 7)
-                        .padding(.vertical, 3)
-                        .background(Capsule().fill(.black.opacity(0.7)))
-                        .foregroundStyle(.cpText)
-                        .padding(6)
-                }
-
                 // 播放覆盖按钮
                 Button(action: { onPlay(item) }) {
                     Image(systemName: "play.fill")
@@ -49,10 +41,20 @@ struct ContinueWatchingRow: View {
                         .background(Circle().fill(.cpCTA))
                 }
                 .buttonStyle(.plain)
-                .padding(.trailing, 8)
+                .padding(8)
             }
-            .contentShape(Rectangle())
-            .onTapGesture { onOpen(item) }
+            .overlay(alignment: .topTrailing) {
+                // 角标放右上角，避免与播放钮重叠
+                if let remaining = remainingLabel(for: item) {
+                    Text(remaining)
+                        .font(.system(size: 11, weight: .medium).monospacedDigit())
+                        .padding(.horizontal, 7)
+                        .padding(.vertical, 3)
+                        .background(Capsule().fill(.black.opacity(0.7)))
+                        .foregroundStyle(.cpText)
+                        .padding(6)
+                }
+            }
 
             Text(item.displayTitle)
                 .font(.system(size: 13, weight: .medium))

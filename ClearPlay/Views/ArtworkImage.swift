@@ -1,26 +1,20 @@
 import SwiftUI
 
-/// 从本地缓存文件加载图片（海报/背景图）
+/// 从本地缓存文件加载图片（海报/背景图），NSCache 避免网格滚动时反复解码
 struct ArtworkImage: View {
     let url: URL?
 
+    /// 进程级图片缓存
+    private static let cache = NSCache<NSString, NSUIImage>()
+
     var body: some View {
-        if let url, let image = loadPlatformImage(path: url.path) {
-            image
+        if let url, let image = Self.load(path: url.path) {
+            platformImage(image)
                 .resizable()
                 .scaledToFill()
         } else {
             nilView
         }
-    }
-
-    private func loadPlatformImage(path: String) -> Image? {
-        guard let img = NSUIImage(contentsOfFile: path) else { return nil }
-        #if canImport(AppKit)
-        return Image(nsImage: img)
-        #else
-        return Image(uiImage: img)
-        #endif
     }
 
     private var nilView: some View {
@@ -30,6 +24,22 @@ struct ArtworkImage: View {
                 .font(.title2)
                 .foregroundStyle(.cpTextSubtle)
         }
+    }
+
+    /// 读盘 + 内存缓存
+    private static func load(path: String) -> NSUIImage? {
+        if let hit = cache.object(forKey: path as NSString) { return hit }
+        guard let img = NSUIImage(contentsOfFile: path) else { return nil }
+        cache.setObject(img, forKey: path as NSString)
+        return img
+    }
+
+    private func platformImage(_ img: NSUIImage) -> Image {
+        #if canImport(AppKit)
+        Image(nsImage: img)
+        #else
+        Image(uiImage: img)
+        #endif
     }
 }
 

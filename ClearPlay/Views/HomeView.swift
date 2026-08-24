@@ -13,7 +13,8 @@ struct HomeView: View {
     }
 
     private var recent: [MediaItem] {
-        Array(allItems.filter { !$0.inProgress }.prefix(24))
+        // 最近添加包含所有条目（正在看的也在内，按添加时间倒序）
+        Array(allItems.prefix(24))
     }
 
     var body: some View {
@@ -25,8 +26,7 @@ struct HomeView: View {
                     if !continueWatching.isEmpty {
                         ContinueWatchingRow(
                             items: continueWatching,
-                            onPlay: { play($0) },
-                            onOpen: { _ in } // 卡片整体由 NavigationLink 承载
+                            onPlay: { play($0) }
                         )
                     }
 
@@ -89,9 +89,16 @@ struct HomeView: View {
 
     // MARK: - 动作
 
-    /// 播放：以全部条目（按标题排序）为队列
+    /// 播放：队列按条目类型分组——剧集以同剧分集为队列，电影以全部电影为队列
     private func play(_ item: MediaItem) {
-        let queue = allItems.sorted { $0.displayTitle < $1.displayTitle }
-        library.play(queue: queue, start: item)
+        let queue: [MediaItem]
+        if item.kind == .episode, let series = item.seriesName {
+            queue = allItems
+                .filter { $0.kind == .episode && $0.seriesName == series }
+                .sorted { ($0.season ?? 0, $0.episodeNumber ?? 0) < ($1.season ?? 0, $1.episodeNumber ?? 0) }
+        } else {
+            queue = allItems.filter { $0.kind == .movie }.sorted { $0.displayTitle < $1.displayTitle }
+        }
+        library.play(queue: queue.isEmpty ? [item] : queue, start: item)
     }
 }

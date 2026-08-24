@@ -37,9 +37,24 @@ struct TMDBService {
     }
 
     private func search(path: String, query: [URLQueryItem]) async throws -> SearchResult {
+        let best = try await searchOnce(path: path, query: query, language: "zh-CN")
+        // 中文结果缺简介时回退英文查询，标题仍优先用中文
+        if (best.overview ?? "").trimmingCharacters(in: .whitespaces).isEmpty {
+            let fallback = try? await searchOnce(path: path, query: query, language: "en-US")
+            if let fallback, (fallback.overview ?? "").isEmpty == false {
+                var merged = best
+                merged.overview = fallback.overview
+                if best.title.isEmpty { merged.title = fallback.title }
+                return merged
+            }
+        }
+        return best
+    }
+
+    private func searchOnce(path: String, query: [URLQueryItem], language: String) async throws -> SearchResult {
         var components = URLComponents(string: "https://api.themoviedb.org/3/\(path)")!
         components.queryItems = [URLQueryItem(name: "api_key", value: apiKey)] + query
-            + [URLQueryItem(name: "language", value: "zh-CN")]
+            + [URLQueryItem(name: "language", value: language)]
 
         let (data, _) = try await session.data(from: components.url!)
         struct Response: Decodable {
