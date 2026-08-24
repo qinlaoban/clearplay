@@ -28,8 +28,10 @@ final class CloudSyncService {
     private(set) var lastError: String?
 
     private let containerID: String
-    /// 惰性创建：无 entitlement 时 CKContainer(identifier:) 会直接抛异常崩溃
+    /// 惰性创建：无 entitlement 时 CKContainer(identifier:) 会直接抛 ObjC 异常
     private var container: CKContainer?
+    /// 容器创建失败（异常）后不再重试
+    private var containerFailed = false
 
     /// 待推送的更新（按 mediaPath 合并去重，延迟批量上传）
     private var pendingPushes: [String: (position: Double, duration: Double)] = [:]
@@ -41,13 +43,24 @@ final class CloudSyncService {
         self.containerID = containerID
     }
 
-    /// 仅在 entitlement 已配置时创建容器；否则返回 nil（同步静默禁用）
+    /// 仅在 entitlement 已配置且创建不抛异常时返回容器；否则返回 nil（同步静默禁用）。
+    /// iOS 上无法可靠探测 entitlement，因此统一用 ObjC 异常捕获兜底：
+    /// CKContainer(identifier:) 缺 entitlement 时抛 NSException，捕获后降级为不可用。
     private func ensureContainer() -> CKContainer? {
         if let container { return container }
+        guard !containerFailed else { return nil }
         guard Self.hasICloudEntitlement(containerID: containerID) else { return nil }
-        let c = CKContainer(identifier: containerID)
-        container = c
-        return c
+        var created: CKContainer?
+        let error = CPExceptionCatcher.catchException {
+            created = CKContainer(identifier: self.containerID)
+        }
+        if let error {
+            containerFailed = true
+            debugLog("CKContainer init threw: \(error.localizedDescription)")
+            return nil
+        }
+        container = created
+        return created
     }
 
     /// 探测当前签名是否包含目标 iCloud 容器 entitlement
@@ -59,8 +72,7 @@ final class CloudSyncService {
         ) as? [String] else { return false }
         return value.contains(containerID)
         #else
-        // iOS 上 SecTask 不可公开使用；正式签名包默认带 entitlement，
-        // 未配置时由 activate() 的 userRecordID 探测兜底降级
+        // iOS 上 SecTask 非公开 API；交给 ensureContainer 的异常捕获兜底降级
         true
         #endif
     }
@@ -145,12 +157,14 @@ final class CloudSyncService {
 
     // MARK: - 拉取
 
-    /// 拉取自上次同步以来更新的位置并回调（首次全量）
+    /// 拉取自上次同步以来更新的位置并回调（首次全量）。
+    /// 任一页失败即中断且不推进 lastPullDate，下次重拉同一时间窗。
     func pull(apply: @escaping ([PlaybackUpdate]) -> Void) async {
         guard isEnabled else { return }
 
         var all: [PlaybackUpdate] = []
-        let predicate = lastPullDate.map {
+        let since = lastPullDate
+        let predicate = since.map {
             NSPredicate(format: "modificationDate > %@", $0 as NSDate)
         } ?? NSPredicate(value: true)
         let query = CKQuery(recordType: Self.recordType, predicate: predicate)
@@ -159,9 +173,14 @@ final class CloudSyncService {
         first.resultsLimit = 400
 
         var operation: CKQueryOperation? = first
+        var succeeded = true
         while let op = operation {
-            let (batch, cursor) = await execute(op)
+            let (batch, cursor, ok) = await execute(op)
             all += batch
+            if !ok {
+                succeeded = false
+                break
+            }
             if let cursor {
                 let next = CKQueryOperation(cursor: cursor)
                 next.desiredKeys = ["mediaPath", "position"]
@@ -172,15 +191,18 @@ final class CloudSyncService {
             }
         }
 
-        lastPullDate = Date()
-        apply(all)
-        debugLog("cloud pull: \(all.count) updates")
+        // 全部分页成功才推进水位线，避免失败丢更新
+        if succeeded {
+            lastPullDate = Date()
+            apply(all)
+        }
+        debugLog("cloud pull: \(all.count) updates, ok=\(succeeded)")
     }
 
-    /// 执行单页查询，返回本批更新与下一页游标
-    private func execute(_ operation: CKQueryOperation) async -> (batch: [PlaybackUpdate], next: CKQueryOperation.Cursor?) {
+    /// 执行单页查询，返回本批更新、下一页游标与成败标记
+    private func execute(_ operation: CKQueryOperation) async -> (batch: [PlaybackUpdate], next: CKQueryOperation.Cursor?, ok: Bool) {
         guard let database = ensureContainer()?.privateCloudDatabase else {
-            return ([], nil)
+            return ([], nil, false)
         }
         return await withCheckedContinuation { continuation in
             var batch: [PlaybackUpdate] = []
@@ -195,10 +217,11 @@ final class CloudSyncService {
                 switch result {
                 case .success(let cursor):
                     nextCursor = cursor
+                    continuation.resume(returning: (batch, cursor, true))
                 case .failure(let error):
                     debugLog("cloud query failed: \(error)")
+                    continuation.resume(returning: (batch, nil, false))
                 }
-                continuation.resume(returning: (batch, nextCursor))
             }
             database.add(operation)
         }

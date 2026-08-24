@@ -50,14 +50,13 @@ struct ClearPlayApp: App {
                     // 启动：恢复旧播放队列 → 刷新 WebDAV 鉴权表 → 扫描资料库 → 刮削
                     library.restoreFromDisk()
                     mediaLib.refreshAuthStore()
+                    await mediaLib.scanAndScrape()
 
-                    // iCloud 续播同步：先拉取其他设备的进度，再启动本地扫描
+                    // iCloud 续播拉取放在扫描后：新入库条目也能命中远端进度
                     await cloud.activate()
                     await cloud.pull { updates in
                         CloudSyncService.apply(updates, to: container.mainContext)
                     }
-
-                    await mediaLib.scanAndScrape()
 
                     // 调试辅助：CLEARPLAY_TEST_FILE=/path/to.mp4 自动加载
                     if let path = ProcessInfo.processInfo.environment["CLEARPLAY_TEST_FILE"] {
