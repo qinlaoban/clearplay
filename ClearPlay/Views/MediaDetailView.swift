@@ -64,8 +64,8 @@ struct MediaDetailView: View {
                 .clipped()
 
             LinearGradient(
-                colors: [.clear, .cpBackground],
-                startPoint: .center,
+                colors: [.cpBackground.opacity(0), .cpBackground.opacity(0), .cpBackground],
+                startPoint: .top,
                 endPoint: .bottom
             )
         }
@@ -85,16 +85,19 @@ struct MediaDetailView: View {
                     .font(.system(size: 28, weight: .bold))
                     .foregroundStyle(.cpText)
 
-                HStack(spacing: 10) {
+                HStack(spacing: 8) {
                     if let y = item.year { Text(String(y)) }
                     if let r = item.rating {
+                        separator
                         Label(String(format: "%.1f", r), systemImage: "star.fill")
                             .foregroundStyle(.yellow)
                     }
                     if item.durationSeconds > 0 {
+                        separator
                         Text(Format.duration(item.durationSeconds))
                     }
                     if item.kind == .episode {
+                        separator
                         Text("剧集")
                     }
                 }
@@ -109,6 +112,12 @@ struct MediaDetailView: View {
             }
             Spacer()
         }
+    }
+
+    /// 信息行分隔符（年份 · 评分 · 时长）
+    private var separator: some View {
+        Text("·")
+            .foregroundStyle(.cpTextFaint)
     }
 
     /// 播放 / 收藏 / 重新匹配

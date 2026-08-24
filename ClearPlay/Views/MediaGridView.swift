@@ -9,12 +9,13 @@ struct MediaGridView: View {
     let title: String
     var favoritesOnly: Bool = false
 
+    // 注意：Query 的 sort 键必须是持久化属性（displayTitle 是计算属性，会导致运行时崩溃）
     @Query private var allItems: [MediaItem]
 
     init(kind: MediaKind, title: String) {
         self.kind = kind
         self.title = title
-        _allItems = Query(sort: \MediaItem.displayTitle)
+        _allItems = Query(sort: \MediaItem.title)
     }
 
     /// 收藏视图专用初始化
@@ -24,12 +25,13 @@ struct MediaGridView: View {
         self.favoritesOnly = favoritesOnly
         _allItems = Query(
             filter: #Predicate { $0.favorite == true },
-            sort: \MediaItem.displayTitle
+            sort: \MediaItem.title
         )
     }
 
     private var items: [MediaItem] {
-        favoritesOnly ? allItems : allItems.filter { $0.kind == kind }
+        let base = favoritesOnly ? allItems : allItems.filter { $0.kind == kind }
+        return base.sorted { $0.displayTitle < $1.displayTitle }
     }
 
     var body: some View {

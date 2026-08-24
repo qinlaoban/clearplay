@@ -32,6 +32,7 @@ struct ClearPlayApp: App {
                 .modelContainer(container)
                 .environment(library)
                 .environment(mediaLib)
+                .preferredColorScheme(.dark)
                 .task {
                     // 导入散装文件后自动开始播放（队列按类型分组）
                     mediaLib.onFilesImported = { item in
