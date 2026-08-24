@@ -10,8 +10,12 @@ struct SettingsView: View {
 
     @Environment(MediaLibraryViewModel.self) private var media
     @Query(sort: \LibraryFolder.addedAt) private var folders: [LibraryFolder]
+    @Query(sort: \WebDAVServer.addedAt) private var servers: [WebDAVServer]
 
     @State private var showFolderImporter = false
+    @State private var showServerForm = false
+    /// 正在浏览的服务器（非 nil 时显示浏览器）
+    @State private var browsingServer: WebDAVServer?
 
     var body: some View {
         Form {
@@ -21,6 +25,45 @@ struct SettingsView: View {
                 Text("填写后新扫描的影片会自动匹配海报与简介。可在 https://www.themoviedb.org/settings/api 免费申请。")
                     .font(.system(size: 11))
                     .foregroundStyle(.cpTextSubtle)
+            }
+
+            Section("WebDAV") {
+                ForEach(servers) { server in
+                    HStack {
+                        Image(systemName: "cloud.fill")
+                            .foregroundStyle(.cpPrimary)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(server.name)
+                                .font(.system(size: 13, weight: .medium))
+                            Text(server.baseURL)
+                                .font(.system(size: 11))
+                                .foregroundStyle(.cpTextSubtle)
+                                .lineLimit(1)
+                        }
+                        Spacer()
+                        Button("浏览导入") {
+                            browsingServer = server
+                        }
+                        .buttonStyle(.borderless)
+                        Button(role: .destructive) {
+                            media.removeServer(server)
+                        } label: {
+                            Image(systemName: "trash")
+                        }
+                        .buttonStyle(.borderless)
+                    }
+                }
+
+                Button {
+                    showServerForm = true
+                } label: {
+                    Label("添加服务器…", systemImage: "plus")
+                }
+                if media.isScanning {
+                    Label("正在扫描远程目录…", systemImage: "arrow.triangle.2.circlepath")
+                        .font(.system(size: 12))
+                        .foregroundStyle(.cpTextSubtle)
+                }
             }
 
             Section("资料库文件夹") {
@@ -106,6 +149,17 @@ struct SettingsView: View {
         ) { result in
             if case .success(let urls) = result, let url = urls.first {
                 media.addFolder(url: url)
+            }
+        }
+        .sheet(isPresented: $showServerForm) {
+            WebDAVServerFormSheet()
+                .environment(media)
+        }
+        .sheet(item: $browsingServer) { server in
+            NavigationStack {
+                WebDAVBrowserView(server: server) { path in
+                    Task { await media.importWebDAVFolder(server: server, path: path) }
+                }
             }
         }
     }

@@ -11,7 +11,7 @@ struct ClearPlayApp: App {
 
     init() {
         debugLog("app launched")
-        let schema = Schema([MediaItem.self, LibraryFolder.self])
+        let schema = Schema([MediaItem.self, LibraryFolder.self, WebDAVServer.self])
         let config = ModelConfiguration("ClearPlay", schema: schema)
         do {
             container = try ModelContainer(for: schema, configurations: config)
@@ -19,7 +19,7 @@ struct ClearPlayApp: App {
             debugLog("ModelContainer init failed: \(error), fallback in-memory")
             // 兜底：内存模式保证 App 可用
             container = try! ModelContainer(
-                for: MediaItem.self, LibraryFolder.self,
+                for: MediaItem.self, LibraryFolder.self, WebDAVServer.self,
                 configurations: ModelConfiguration(isStoredInMemoryOnly: true)
             )
         }
@@ -51,8 +51,10 @@ struct ClearPlayApp: App {
                     // 位置落盘桥：同步写回 SwiftData（海报墙进度条/续播）
                     library.onPositionSave = { url, seconds in
                         let ctx = container.mainContext
+                        // 本地条目 path 是文件路径，远程条目 path 是完整 URL 字符串
+                        let key = url.isFileURL ? url.path : url.absoluteString
                         var desc = FetchDescriptor<MediaItem>(
-                            predicate: #Predicate { $0.path == url.path }
+                            predicate: #Predicate { $0.path == key }
                         )
                         desc.fetchLimit = 1
                         if let item = try? ctx.fetch(desc).first {
@@ -62,8 +64,9 @@ struct ClearPlayApp: App {
                         }
                     }
 
-                    // 启动：恢复旧播放队列 → 扫描资料库 → 刮削
+                    // 启动：恢复旧播放队列 → 刷新 WebDAV 鉴权表 → 扫描资料库 → 刮削
                     library.restoreFromDisk()
+                    mediaLib.refreshAuthStore()
                     await mediaLib.scanAndScrape()
 
                     // 调试辅助：CLEARPLAY_TEST_FILE=/path/to.mp4 自动加载

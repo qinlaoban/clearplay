@@ -151,9 +151,132 @@ final class MediaLibraryViewModel {
     }
 
     private func loadDuration(url: URL) async -> Double {
+        // 远程源加 15s 超时，避免慢速服务器阻塞扫描
+        if url.scheme == "http" || url.scheme == "https" {
+            return await withTaskGroup(of: Double.self) { group in
+                group.addTask { [url] in
+                    let asset = AVURLAsset(url: url)
+                    guard let d = try? await asset.load(.duration), d.seconds.isFinite else { return 0 }
+                    return d.seconds
+                }
+                group.addTask {
+                    try? await Task.sleep(for: .seconds(15))
+                    return 0
+                }
+                let first = await group.next() ?? 0
+                group.cancelAll()
+                return first
+            }
+        }
         let asset = AVURLAsset(url: url)
         guard let duration = try? await asset.load(.duration), duration.seconds.isFinite else { return 0 }
         return duration.seconds
+    }
+
+    // MARK: - WebDAV
+
+    /// 远程条目 folderPath 前缀（用于删除时清理）
+    static let webdavFolderPrefix = "webdav:"
+
+    /// 添加服务器配置（密码写入 Keychain），并刷新播放鉴权表；baseURL 相同则更新
+    func addServer(name: String, baseURL: String, username: String, password: String) {
+        let context = container.mainContext
+        if let existing = fetchServer(baseURL: baseURL, context: context) {
+            existing.name = name.isEmpty ? existing.name : name
+            existing.username = username
+            existing.password = password
+        } else {
+            let server = WebDAVServer(name: name.isEmpty ? URL(string: baseURL)?.host ?? "WebDAV" : name,
+                                      baseURL: baseURL, username: username)
+            context.insert(server)
+            try? context.save()
+            server.password = password
+        }
+        try? context.save()
+        refreshAuthStore(context: context)
+    }
+
+    func removeServer(_ server: WebDAVServer) {
+        let context = container.mainContext
+        server.destroy() // 清 Keychain 密码
+        let id = server.id.uuidString
+        let prefix = Self.webdavFolderPrefix + id
+        let desc = FetchDescriptor<MediaItem>(predicate: #Predicate { $0.folderPath == prefix })
+        if let items = try? context.fetch(desc) {
+            for item in items {
+                PosterStore.remove(item.posterFile)
+                PosterStore.remove(item.backdropFile)
+                context.delete(item)
+            }
+        }
+        context.delete(server)
+        try? context.save()
+        refreshAuthStore(context: context)
+    }
+
+    private func fetchServer(baseURL: String, context: ModelContext) -> WebDAVServer? {
+        var desc = FetchDescriptor<WebDAVServer>(predicate: #Predicate { $0.baseURL == baseURL })
+        desc.fetchLimit = 1
+        return try? context.fetch(desc).first
+    }
+
+    /// 同步内存鉴权表（PlayerViewModel 播放远程源时查）
+    func refreshAuthStore(context: ModelContext? = nil) {
+        let ctx = context ?? container.mainContext
+        let servers = (try? ctx.fetch(FetchDescriptor<WebDAVServer>())) ?? []
+        RemoteAuthStore.reload(servers: servers)
+    }
+
+    /// 递归扫描 WebDAV 目录并入库（随后触发刮削）
+    func importWebDAVFolder(server: WebDAVServer, path: String = "") async {
+        guard !isScanning else { return }
+        isScanning = true
+        defer { isScanning = false }
+
+        do {
+            let client = try RemoteAuthStore.makeClient(server: server)
+
+            // BFS 列出全部视频文件
+            var queue = [path]
+            var videos: [WebDAVEntry] = []
+            while let dir = queue.popLast() {
+                let entries = try await client.list(path: dir)
+                for entry in entries {
+                    if entry.isDirectory {
+                        queue.append(entry.url.path)
+                    } else if entry.isVideo {
+                        videos.append(entry)
+                    }
+                }
+                if videos.count + queue.count > 2000 { break } // 防御超大库
+            }
+
+            let bgContext = ModelContext(container)
+            let folderTag = Self.webdavFolderPrefix + server.id.uuidString
+            var addedCount = 0
+            for video in videos {
+                let key = video.url.absoluteString
+                var desc = FetchDescriptor<MediaItem>(predicate: #Predicate { $0.path == key })
+                desc.fetchLimit = 1
+                if (try? bgContext.fetch(desc).first) != nil { continue }
+
+                let parsed = FilenameParser.parse(video.name)
+                let item = MediaItem(path: key, folderPath: folderTag, parsed: parsed)
+                item.durationSeconds = await loadDuration(url: video.url)
+                bgContext.insert(item)
+                addedCount += 1
+            }
+            try bgContext.save()
+            debugLog("webdav import: \(addedCount) new / \(videos.count) found")
+
+            if videos.isEmpty {
+                lastError = "该目录下没有找到视频文件"
+            } else {
+                await scrapePending()
+            }
+        } catch {
+            lastError = "WebDAV 扫描失败：\(error.localizedDescription)"
+        }
     }
 
     // MARK: - TMDB 刮削

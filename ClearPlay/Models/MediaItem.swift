@@ -57,7 +57,14 @@ final class MediaItem {
     // MARK: - 计算属性
 
     var kind: MediaKind { MediaKind(rawValue: kindRaw) ?? .movie }
-    var url: URL { URL(fileURLWithPath: path) }
+    /// 本地文件 → file URL；远程条目（WebDAV）path 存完整 http(s) URL 字符串
+    var url: URL {
+        if let remote = URL(string: path), remote.scheme == "http" || remote.scheme == "https" {
+            return remote
+        }
+        return URL(fileURLWithPath: path)
+    }
+    var isRemote: Bool { url.scheme == "http" || url.scheme == "https" }
     /// 海报墙展示用标题
     var displayTitle: String {
         if kind == .episode, let s = season, let e = episodeNumber {

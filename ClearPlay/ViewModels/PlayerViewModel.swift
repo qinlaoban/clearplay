@@ -58,9 +58,22 @@ final class PlayerViewModel {
     private func performLoad(url: URL, startPosition: Double?, engine: AetherEngine) async {
         isLoading = true
         do {
-            // 自动挂载同目录外挂字幕（Movie.zh.srt 等）
-            let sidecars = LocalSubtitleFinder.sidecars(for: url)
             var options = LoadOptions()
+            let isRemote = url.scheme == "http" || url.scheme == "https"
+
+            // 外挂字幕：本地文件查同目录；远程文件从 WebDAV 目录下载同名字幕
+            let sidecars: [ExternalSubtitleTrack]
+            if isRemote {
+                if let client = remoteClient(for: url) {
+                    sidecars = await RemoteSubtitleFinder.sidecars(for: url, client: client)
+                } else {
+                    sidecars = []
+                }
+                // WebDAV 等需要鉴权的源：Authorization 头注入引擎的所有 Range 请求
+                options.httpHeaders = RemoteAuthStore.headers(for: url)
+            } else {
+                sidecars = LocalSubtitleFinder.sidecars(for: url)
+            }
             options.externalSubtitles = sidecars
 
             if let startPosition {
@@ -92,6 +105,17 @@ final class PlayerViewModel {
 
     /// 当前播放文件信息（供在线字幕搜索用）
     var currentVideoURL: URL? { loadedURL }
+
+    /// 远程 URL 命中的 WebDAV 客户端（取字幕目录列表用）；非远程或未配置返回 nil
+    private func remoteClient(for url: URL) -> WebDAVClient? {
+        guard url.scheme == "http" || url.scheme == "https" else { return nil }
+        for server in RemoteAuthStore.servers {
+            guard let base = server.url,
+                  url.absoluteString.hasPrefix(base.absoluteString) else { continue }
+            return try? RemoteAuthStore.makeClient(server: server)
+        }
+        return nil
+    }
 
     /// 订阅引擎与时钟的发布状态
     private func bind(engine: AetherEngine) {
