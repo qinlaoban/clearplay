@@ -20,6 +20,9 @@ struct PlayerView: View {
     @State private var upNextItem: VideoItem?
     @State private var upNextCountdown = 8
     @State private var countdownTask: Task<Void, Never>?
+    /// 双击快进/快退的瞬时提示（nil 不显示）
+    @State private var seekFlash: String?
+    @State private var flashTask: Task<Void, Never>?
 
     private func savePosition(at seconds: Double? = nil) {
         let t = seconds ?? vm.currentTime
@@ -49,6 +52,19 @@ struct PlayerView: View {
                     Text(error)
                 }
                 .frame(maxWidth: 420)
+            }
+
+            // 双击左右区域：快退/快进 10 秒（覆盖在画面上、控制条之下）
+            seekGestureZones
+
+            // 快进/快退瞬时提示
+            if let flash = seekFlash {
+                Text(flash)
+                    .font(.cpHeading)
+                    .foregroundStyle(.white)
+                    .padding(20)
+                    .background(Circle().fill(.black.opacity(0.55)))
+                    .transition(.opacity)
             }
 
             controlOverlay
@@ -111,10 +127,37 @@ struct PlayerView: View {
         }
     }
 
-    // MARK: - 控制条
+    // MARK: - 控制层
 
+    /// 双击快进/快退区域（左右各 1/3 屏宽）
+    private var seekGestureZones: some View {
+        HStack(spacing: 0) {
+            Color.clear
+                .contentShape(Rectangle())
+                .onTapGesture(count: 2) { flashSkip(-10) }
+            Color.clear.allowsHitTesting(false)
+            Color.clear
+                .contentShape(Rectangle())
+                .onTapGesture(count: 2) { flashSkip(10) }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    private func flashSkip(_ delta: Double) {
+        vm.skip(by: delta)
+        flashTask?.cancel()
+        seekFlash = delta < 0 ? "−10s" : "+10s"
+        flashTask = Task {
+            try? await Task.sleep(for: .seconds(0.6))
+            guard !Task.isCancelled else { return }
+            withAnimation(.easeOut(duration: 0.2)) { seekFlash = nil }
+        }
+    }
+
+    /// 沉浸式控制层：顶栏（返回+片名+全屏）与底部（进度+控制）分开，Material 模糊背景
     private var controlOverlay: some View {
         VStack {
+            topBar
             Spacer()
             VStack(spacing: 8) {
                 scrubberRow
@@ -123,14 +166,7 @@ struct PlayerView: View {
             .padding(.horizontal, 20)
             .padding(.top, 12)
             .padding(.bottom, 16)
-            .background(
-                LinearGradient(
-                    colors: [.clear, .black.opacity(0.7)],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-                .allowsHitTesting(false)
-            )
+            .controlChrome()
             #if os(macOS)
             // 指针停在控制条上时不自动隐藏
             .onContinuousHover { phase in
@@ -150,6 +186,42 @@ struct PlayerView: View {
         // 隐藏时禁止命中，避免遮挡下层点击/手势
         .allowsHitTesting(controlsVisible)
         .animation(.easeInOut(duration: 0.25), value: controlsVisible)
+    }
+
+    /// 顶栏：关闭播放器 + 片名 + 全屏（macOS）
+    private var topBar: some View {
+        HStack(spacing: 12) {
+            Button {
+                library.current = nil
+            } label: {
+                Image(systemName: "chevron.down")
+            }
+            .help("退出播放")
+
+            Text(item.name)
+                .font(.cpBodyMed)
+                .foregroundStyle(.white.opacity(0.9))
+                .lineLimit(1)
+                .truncationMode(.middle)
+
+            Spacer()
+
+            #if os(macOS)
+            Button {
+                toggleFullscreen()
+            } label: {
+                Image(systemName: "arrow.up.left.and.arrow.down.right")
+            }
+            .help("全屏")
+            #endif
+        }
+        .buttonStyle(.plain)
+        .foregroundStyle(.white)
+        .labelStyle(.iconOnly)
+        .font(.cpControl)
+        .padding(.horizontal, 20)
+        .padding(.vertical, 12)
+        .controlChrome(top: true)
     }
 
     /// 进度条 + 时间标签
@@ -264,22 +336,16 @@ struct PlayerView: View {
                 .help("画中画")
             }
 
-            // 关闭播放器（回到海报墙）
+            // 键盘上下方向键调音量（隐藏快捷键载体）
             Button {
-                library.current = nil
-            } label: {
-                Image(systemName: "xmark")
-            }
-            .help("关闭")
+                vm.volume = min(1, vm.volume + 0.1)
+            } label: { EmptyView() }
+            .keyboardShortcut(.upArrow, modifiers: [])
 
-            #if os(macOS)
             Button {
-                toggleFullscreen()
-            } label: {
-                Image(systemName: "arrow.up.left.and.arrow.down.right")
-            }
-            .help("全屏")
-            #endif
+                vm.volume = max(0, vm.volume - 0.1)
+            } label: { EmptyView() }
+            .keyboardShortcut(.downArrow, modifiers: [])
         }
         .buttonStyle(.plain)
         .foregroundStyle(.white)
@@ -501,4 +567,21 @@ struct PlayerView: View {
         window.toggleFullScreen(nil)
     }
     #endif
+}
+
+/// 控制层背景：黑色渐变压底 + Material 模糊，比纯黑渐变更有层次
+extension View {
+    fileprivate func controlChrome(top: Bool = false) -> some View {
+        background(
+            LinearGradient(
+                colors: top
+                    ? [.black.opacity(0.55), .black.opacity(0.15), .clear]
+                    : [.clear, .black.opacity(0.35), .black.opacity(0.7)],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .background(.ultraThinMaterial)
+        )
+        .allowsHitTesting(false)
+    }
 }

@@ -11,6 +11,7 @@ struct SettingsView: View {
     @State private var passwordEdited = false
 
     @Environment(MediaLibraryViewModel.self) private var media
+    @Environment(LibraryViewModel.self) private var library
     @Query(sort: \LibraryFolder.addedAt) private var folders: [LibraryFolder]
     @Query(sort: \WebDAVServer.addedAt) private var servers: [WebDAVServer]
 
@@ -160,11 +161,20 @@ struct SettingsView: View {
         }
         .sheet(item: $browsingServer) { server in
             NavigationStack {
-                WebDAVBrowserView(server: server) { path in
+                WebDAVBrowserView(server: server, onImport: { path in
                     Task { await media.importWebDAVFolder(server: server, path: path) }
-                }
+                }, onPlayFile: { url in
+                    playRemote(url)
+                })
             }
         }
+    }
+
+    /// 浏览器中直接播放远程文件（不入库，临时条目）
+    private func playRemote(_ url: URL) {
+        let parsed = FilenameParser.parse(url.lastPathComponent)
+        let item = MediaItem(path: url.absoluteString, folderPath: "", parsed: parsed)
+        library.play(queue: [item], start: item)
     }
 
     /// OpenSubtitles 配置持久化：Key 存 UserDefaults，账号存 Keychain

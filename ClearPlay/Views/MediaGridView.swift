@@ -92,6 +92,9 @@ struct MediaGridView: View {
                                     row(item)
                                 }
                                 .buttonStyle(.plain)
+                                .contextMenu {
+                                    Button("播放") { play(item) }
+                                }
                             }
                         }
                         .padding(CPMetrics.pad)

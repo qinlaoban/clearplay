@@ -14,10 +14,7 @@ struct ContinueWatchingRow: View {
             ScrollView(.horizontal, showsIndicators: false) {
                 LazyHStack(spacing: 14) {
                     ForEach(items) { item in
-                        NavigationLink(value: item) {
-                            card(for: item)
-                        }
-                        .buttonStyle(.plain)
+                        ContinueWatchingCard(item: item, onPlay: onPlay)
                     }
                 }
                 .padding(.vertical, 2)
@@ -25,26 +22,56 @@ struct ContinueWatchingRow: View {
         }
     }
 
-    private func card(for item: MediaItem) -> some View {
+    /// 剩余时间文案（"剩 23 分钟"/"1 小时 5 分"）
+    private func remainingLabel(for item: MediaItem) -> String? {
+        guard item.durationSeconds > item.resumeSeconds else { return nil }
+        let remain = item.durationSeconds - item.resumeSeconds
+        let minutes = Int(remain / 60)
+        if minutes < 60 { return "剩 \(max(minutes, 1)) 分钟" }
+        return String(format: "剩 %d 小时 %02d 分", minutes / 60, minutes % 60)
+    }
+}
+
+/// 继续观看卡片：NavigationLink 进详情，播放钮在链接外层（hover 浮现），避免嵌套触发
+struct ContinueWatchingCard: View {
+    let item: MediaItem
+    var onPlay: (MediaItem) -> Void
+
+    @State private var hovered = false
+
+    var body: some View {
+        ZStack(alignment: .bottomTrailing) {
+            NavigationLink(value: item) {
+                cardVisual
+            }
+            .buttonStyle(.plain)
+
+            Button(action: { onPlay(item) }) {
+                Image(systemName: "play.fill")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundStyle(.black)
+                    .frame(width: 36, height: 36)
+                    .background(Circle().fill(.cpCTA))
+                    .shadow(color: .black.opacity(0.4), radius: 6)
+            }
+            .buttonStyle(.plain)
+            .padding(8)
+            .opacity(hovered ? 1 : 0.85)
+            .help("播放")
+        }
+        #if os(macOS)
+        .onHover { hovered = $0 }
+        #endif
+    }
+
+    private var cardVisual: some View {
         VStack(alignment: .leading, spacing: 6) {
-            ZStack(alignment: .bottomTrailing) {
+            ZStack(alignment: .topTrailing) {
                 ArtworkImage(url: item.artworkURL(item.backdropFile) ?? item.artworkURL(item.posterFile))
                     .frame(width: 260, height: 146)
                     .clipShape(RoundedRectangle(cornerRadius: 8))
 
-                // 播放覆盖按钮
-                Button(action: { onPlay(item) }) {
-                    Image(systemName: "play.fill")
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundStyle(.black)
-                        .frame(width: 36, height: 36)
-                        .background(Circle().fill(.cpCTA))
-                }
-                .buttonStyle(.plain)
-                .padding(8)
-            }
-            .overlay(alignment: .topTrailing) {
-                // 角标放右上角，避免与播放钮重叠
+                // 剩余时间角标
                 if let remaining = remainingLabel(for: item) {
                     Text(remaining)
                         .font(.cpCaption)
@@ -66,7 +93,6 @@ struct ContinueWatchingRow: View {
         .frame(width: 260, alignment: .leading)
     }
 
-    /// 剩余时间文案（"剩 23 分钟"/"1 小时 5 分"）
     private func remainingLabel(for item: MediaItem) -> String? {
         guard item.durationSeconds > item.resumeSeconds else { return nil }
         let remain = item.durationSeconds - item.resumeSeconds

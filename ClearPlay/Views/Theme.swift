@@ -53,8 +53,8 @@ extension ShapeStyle where Self == Color {
 extension Font {
     static let cpTitle = Font.system(size: 28, weight: .bold)
     static let cpHeading = Font.system(size: 20, weight: .semibold)
-    static let cpBody = Font.system(size: 13, weight: .regular)
-    static let cpBodyMed = Font.system(size: 13, weight: .medium)
+    static let cpBody = Font.system(size: 14, weight: .regular)
+    static let cpBodyMed = Font.system(size: 14, weight: .medium)
     static let cpSmall = Font.system(size: 12, weight: .regular)
     static let cpCaption = Font.system(size: 11, weight: .regular)
 
@@ -62,6 +62,57 @@ extension Font {
     static let cpControl = Font.system(size: 17, weight: .medium)
     static let cpPlay = Font.system(size: 24, weight: .semibold)
     static let cpButton = Font.system(size: 15, weight: .semibold)
+}
+
+// MARK: - 复用按钮样式
+
+/// 主行动按钮（白底黑字，播放/导入等主 CTA）
+struct PrimaryButtonStyle: ButtonStyle {
+    var tint: Color = .white
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(.cpButton)
+            .padding(.horizontal, 22)
+            .padding(.vertical, 10)
+            .background(Capsule().fill(tint.opacity(configuration.isPressed ? 0.75 : 1)))
+            .foregroundStyle(.black)
+            .opacity(configuration.isPressed ? 0.85 : 1)
+    }
+}
+
+/// 图标按钮（圆形 hover 底，控制条/工具栏通用）
+struct IconButtonStyle: ButtonStyle {
+    /// 图标字号
+    var size: Font = .cpControl
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .labelStyle(.iconOnly)
+            .font(size)
+            .foregroundStyle(.cpText)
+            .frame(width: 34, height: 34)
+            .background(Circle().fill(Color.white.opacity(configuration.isPressed ? 0.22 : 0.08)))
+    }
+}
+
+/// 小徽章（来源/质量标识）
+struct CPBadge: View {
+    let text: String
+    var systemImage: String? = nil
+
+    var body: some View {
+        HStack(spacing: 3) {
+            if let systemImage {
+                Image(systemName: systemImage).font(.system(size: 9))
+            }
+            Text(text).font(.system(size: 10, weight: .semibold))
+        }
+        .padding(.horizontal, 7)
+        .padding(.vertical, 3)
+        .background(Capsule().fill(.white.opacity(0.14)))
+        .foregroundStyle(.white.opacity(0.85))
+    }
 }
 
 /// 圆角 / 间距设计常量

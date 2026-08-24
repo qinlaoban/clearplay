@@ -1,15 +1,27 @@
 import SwiftUI
 import SwiftData
 
-/// 首页：继续观看 + 最近添加 + 空状态引导
+/// 首页：继续观看 + 最近播放 + 最近添加 + 空状态引导
 struct HomeView: View {
     @Environment(LibraryViewModel.self) private var library
+    @Environment(MediaLibraryViewModel.self) private var media
     @Query(sort: \MediaItem.addedAt, order: .reverse) private var allItems: [MediaItem]
+
+    @State private var showFolderImporter = false
 
     private var continueWatching: [MediaItem] {
         allItems
             .filter { $0.inProgress }
             .sorted { ($0.playedAt ?? .distantPast) > ($1.playedAt ?? .distantPast) }
+    }
+
+    /// 最近播过（不含进行中的，那些已在继续观看区）
+    private var recentlyPlayed: [MediaItem] {
+        allItems
+            .filter { !$0.inProgress && $0.playedAt != nil }
+            .sorted { ($0.playedAt ?? .distantPast) > ($1.playedAt ?? .distantPast) }
+            .prefix(12)
+            .map { $0 }
     }
 
     private var recent: [MediaItem] {
@@ -30,6 +42,13 @@ struct HomeView: View {
                         )
                     }
 
+                    if !recentlyPlayed.isEmpty {
+                        Text("最近播放")
+                            .font(.cpHeading)
+                            .foregroundStyle(.cpText)
+                        posterWall(recentlyPlayed)
+                    }
+
                     if !recent.isEmpty {
                         Text("最近添加")
                             .font(.cpHeading)
@@ -42,11 +61,20 @@ struct HomeView: View {
         }
         .background(.cpBackground)
         .navigationTitle("首页")
+        .fileImporter(
+            isPresented: $showFolderImporter,
+            allowedContentTypes: [.folder],
+            allowsMultipleSelection: false
+        ) { result in
+            if case .success(let urls) = result, let url = urls.first {
+                media.addFolder(url: url)
+            }
+        }
     }
 
     // MARK: - 子视图
 
-    /// 空状态：引导添加资料库目录（shimmer 占位）
+    /// 空状态：引导添加资料库目录 + 大 CTA 按钮
     private var emptyState: some View {
         VStack(spacing: 20) {
             Image(systemName: "film.stack")
@@ -57,10 +85,17 @@ struct HomeView: View {
                 .font(.cpHeading)
                 .foregroundStyle(.cpText)
 
-            Text("在侧栏点击「添加文件夹」，ClearPlay 会自动扫描影片并抓取海报")
+            Text("添加文件夹后 ClearPlay 会自动扫描影片并抓取海报")
                 .font(.cpBody)
                 .foregroundStyle(.cpTextSubtle)
                 .multilineTextAlignment(.center)
+
+            Button {
+                showFolderImporter = true
+            } label: {
+                Label("添加资料库文件夹", systemImage: "folder.badge.plus")
+            }
+            .buttonStyle(PrimaryButtonStyle())
 
             HStack(spacing: 12) {
                 ForEach(0..<3, id: \.self) { _ in

@@ -6,6 +6,8 @@ struct WebDAVBrowserView: View {
     let server: WebDAVServer
     /// 点击"导入此目录"回调（带当前目录路径，根为 ""）
     var onImport: (String) -> Void = { _ in }
+    /// 点击视频文件选"播放"回调
+    var onPlayFile: (URL) -> Void = { _ in }
 
     @Environment(\.dismiss) private var dismiss
     @State private var entries: [WebDAVEntry] = []
@@ -13,6 +15,8 @@ struct WebDAVBrowserView: View {
     @State private var currentPath = ""
     @State private var pathHistory: [String] = []
     @State private var isLoading = false
+    /// 点中待处理的视频文件（弹出播放/导入选择）
+    @State private var tappedFile: WebDAVEntry?
     @State private var error: String?
     @State private var importRequested = false
 
@@ -74,6 +78,22 @@ struct WebDAVBrowserView: View {
                 dismiss()
             }
         }
+        // 点视频文件：播放 / 导入当前目录
+        .confirmationDialog(
+            tappedFile?.name ?? "", isPresented: Binding(
+                get: { tappedFile != nil },
+                set: { if !$0 { tappedFile = nil } }
+            ), titleVisibility: .visible
+        ) {
+            Button("立即播放") {
+                if let file = tappedFile { onPlayFile(file.url) }
+                dismiss()
+            }
+            Button("导入此目录") {
+                importRequested = true
+            }
+            Button("取消", role: .cancel) {}
+        }
     }
 
     @ViewBuilder
@@ -102,7 +122,7 @@ struct WebDAVBrowserView: View {
             if entry.isDirectory {
                 Task { await enter(entry) }
             } else {
-                importRequested = true
+                tappedFile = entry
             }
         } label: {
             HStack(spacing: 12) {

@@ -145,6 +145,10 @@ struct SubtitleSearchSheet: View {
         if query.isEmpty { query = p.title }
         if p.season != nil, seasonText.isEmpty { seasonText = String(p.season!) }
         if p.episode != nil, episodeText.isEmpty { episodeText = String(p.episode!) }
+        // 预填完成且有词时自动搜索，避免打开即"无结果"
+        if !query.trimmingCharacters(in: .whitespaces).isEmpty, results.isEmpty {
+            search()
+        }
     }
 
     private func search() {

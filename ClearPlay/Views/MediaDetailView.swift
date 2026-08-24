@@ -104,6 +104,12 @@ struct MediaDetailView: View {
                 .font(.cpSmall)
                 .foregroundStyle(.cpTextSubtle)
 
+                // 来源徽章（本地 / WebDAV）
+                CPBadge(
+                    text: item.isRemote ? sourceName : "本地",
+                    systemImage: item.isRemote ? "cloud.fill" : "internaldrive.fill"
+                )
+
                 if item.tmdbID == nil {
                     Label("未刮削元数据", systemImage: "sparkles")
                         .font(.cpCaption)
@@ -120,18 +126,38 @@ struct MediaDetailView: View {
             .foregroundStyle(.cpTextFaint)
     }
 
-    /// 播放 / 收藏 / 重新匹配
+    /// 来源名称（WebDAV 服务器名，未知时显示"远程"）
+    private var sourceName: String {
+        let servers = RemoteAuthStore.servers
+        if let server = servers.first(where: { server in
+            item.path.hasPrefix(server.baseURL)
+        }), !server.name.isEmpty {
+            return server.name
+        }
+        return "远程"
+    }
+
+    /// 播放 / 播放全部 / 收藏 / 更多
     private var actionRow: some View {
         HStack(spacing: 14) {
             Button(action: play) {
                 Label(item.inProgress ? "继续播放" : "播放", systemImage: "play.fill")
-                    .font(.cpButton)
-                    .foregroundStyle(.black)
-                    .padding(.horizontal, 22)
-                    .padding(.vertical, 10)
-                    .background(Capsule().fill(.cpCTA))
             }
-            .buttonStyle(.plain)
+            .buttonStyle(PrimaryButtonStyle())
+            // 主 CTA 放大一号
+            .scaleEffect(x: 1.1, y: 1.1)
+
+            if item.kind == .episode && episodes.count > 1 {
+                Button(action: playAll) {
+                    Label("播放全部", systemImage: "play.square.stack")
+                }
+                .buttonStyle(.plain)
+                .font(.cpBodyMed)
+                .foregroundStyle(.cpText)
+                .padding(.horizontal, 18)
+                .padding(.vertical, 10)
+                .background(Capsule().stroke(.cpTextFaint))
+            }
 
             Button {
                 item.favorite.toggle()
@@ -148,6 +174,9 @@ struct MediaDetailView: View {
             Menu {
                 Button("重新匹配 TMDB") {
                     Task { await media.rescrape(item) }
+                }
+                if item.kind == .episode && episodes.count > 1 {
+                    Button("播放全部") { playAll() }
                 }
             } label: {
                 Image(systemName: "ellipsis")
@@ -210,6 +239,12 @@ struct MediaDetailView: View {
         } else {
             library.play(queue: [item], start: item)
         }
+    }
+
+    /// 从第一集开始连播整季（剧集）
+    private func playAll() {
+        guard let first = episodes.first else { return }
+        library.play(queue: episodes, start: first)
     }
 }
 
