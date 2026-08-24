@@ -18,6 +18,7 @@
 		13C45918E7CBD0DD2982CC1B /* ClearPlayApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = E53CF515169CD5FF095E2D0D /* ClearPlayApp.swift */; };
 		1539EB2020EA802642368359 /* ContinueWatchingRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = E36EE3258F9801919B4192BF /* ContinueWatchingRow.swift */; };
 		155D1CA0CC3DBAF65D71E3BC /* SubtitleService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4306E3456DC34F1953B20ED6 /* SubtitleService.swift */; };
+		1BFD7520FFBF31FED208097B /* RecentFeaturesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39E9432999AD3FEC773243AC /* RecentFeaturesTests.swift */; };
 		2126D8810E92B29013417FBD /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFE55C4C8F3F4BED35614ECF /* ContentView.swift */; };
 		21D8EBB71F1C816A31A0FC97 /* PosterStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09F488490CDAA2064CDA371B /* PosterStore.swift */; };
 		24C7099A54F3A1263B6DBF12 /* WebDAVClientTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AC435869E5E606C514230DA /* WebDAVClientTests.swift */; };
@@ -117,6 +118,7 @@
 		32A983E19FE4F46B065E408D /* ClearPlay-macOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "ClearPlay-macOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		38172C21EFC7141F8A15D24B /* CPExceptionCatcher.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CPExceptionCatcher.h; sourceTree = "<group>"; };
 		385973164BB7CD36B9C5AAC1 /* CPExceptionCatcher.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CPExceptionCatcher.m; sourceTree = "<group>"; };
+		39E9432999AD3FEC773243AC /* RecentFeaturesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecentFeaturesTests.swift; sourceTree = "<group>"; };
 		3E0EC39366947F67B0DFDC04 /* MediaGridView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaGridView.swift; sourceTree = "<group>"; };
 		4306E3456DC34F1953B20ED6 /* SubtitleService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubtitleService.swift; sourceTree = "<group>"; };
 		49A8134B4815E2D8DAC4A55B /* TMDBService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TMDBService.swift; sourceTree = "<group>"; };
@@ -285,6 +287,7 @@
 				9AEE10DE3DA68EEF1218ACAB /* MediaItemTests.swift */,
 				323D04C68F2F6939F9A08D31 /* MediaLibraryViewModelTests.swift */,
 				F614A332F41E6800D3848D70 /* MediaQueueTests.swift */,
+				39E9432999AD3FEC773243AC /* RecentFeaturesTests.swift */,
 				16F287A8D832542041FA9256 /* SubtitleServiceTests.swift */,
 				61A5EB558BDBF9F0A76122C6 /* TMDBServiceTests.swift */,
 				5AC435869E5E606C514230DA /* WebDAVClientTests.swift */,
@@ -435,6 +438,7 @@
 				97D772E4F6023B1FE9E82A7A /* MediaItemTests.swift in Sources */,
 				9854E307AEB5E9C90EFD755A /* MediaLibraryViewModelTests.swift in Sources */,
 				B474B614024129EB43D36367 /* MediaQueueTests.swift in Sources */,
+				1BFD7520FFBF31FED208097B /* RecentFeaturesTests.swift in Sources */,
 				863B03D0661A431ADCEA02EA /* SubtitleServiceTests.swift in Sources */,
 				8DDFA1F8232E8FD1D9FE85BA /* TMDBServiceTests.swift in Sources */,
 				24C7099A54F3A1263B6DBF12 /* WebDAVClientTests.swift in Sources */,

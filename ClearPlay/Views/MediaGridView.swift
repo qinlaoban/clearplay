@@ -9,6 +9,22 @@ enum LibrarySort: String, CaseIterable, Identifiable {
     case recent = "最近添加"
 
     var id: String { rawValue }
+
+    /// 对条目应用排序（nil 字段兜底：year→0、rating→-1 沉底）
+    func sorted(_ items: [MediaItem]) -> [MediaItem] {
+        var result = items
+        switch self {
+        case .title:
+            result.sort { $0.displayTitle < $1.displayTitle }
+        case .year:
+            result.sort { ($0.year ?? 0) > ($1.year ?? 0) }
+        case .rating:
+            result.sort { ($0.rating ?? -1) > ($1.rating ?? -1) }
+        case .recent:
+            result.sort { $0.addedAt > $1.addedAt }
+        }
+        return result
+    }
 }
 
 /// 通用库浏览（电影 / 剧集 / 收藏）：海报墙网格 + 搜索 + 排序 + 列表视图切换
@@ -45,18 +61,7 @@ struct MediaGridView: View {
     /// 过滤 + 排序后的条目
     private var items: [MediaItem] {
         let base = favoritesOnly ? allItems : allItems.filter { $0.kind == kind }
-        var result = base
-        switch sortOrder {
-        case .title:
-            result.sort { $0.displayTitle < $1.displayTitle }
-        case .year:
-            result.sort { ($0.year ?? 0) > ($1.year ?? 0) }
-        case .rating:
-            result.sort { ($0.rating ?? -1) > ($1.rating ?? -1) }
-        case .recent:
-            result.sort { $0.addedAt > $1.addedAt }
-        }
-        return result
+        return sortOrder.sorted(base)
     }
 
     var body: some View {
