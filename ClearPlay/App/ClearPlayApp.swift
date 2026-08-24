@@ -1,0 +1,75 @@
+import SwiftUI
+import SwiftData
+
+@main
+struct ClearPlayApp: App {
+    /// SwiftData 容器：媒体条目 + 资料库目录
+    private let container: ModelContainer
+    @State private var library = LibraryViewModel()
+    @State private var mediaLib: MediaLibraryViewModel
+    @Environment(\.scenePhase) private var scenePhase
+
+    init() {
+        debugLog("app launched")
+        let schema = Schema([MediaItem.self, LibraryFolder.self])
+        let config = ModelConfiguration("ClearPlay", schema: schema)
+        do {
+            container = try ModelContainer(for: schema, configurations: config)
+        } catch {
+            debugLog("ModelContainer init failed: \(error), fallback in-memory")
+            // 兜底：内存模式保证 App 可用
+            container = try! ModelContainer(
+                for: MediaItem.self, LibraryFolder.self,
+                configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+            )
+        }
+        _mediaLib = State(initialValue: MediaLibraryViewModel(container: container))
+    }
+
+    var body: some Scene {
+        WindowGroup {
+            ContentView()
+                .environment(library)
+                .environment(mediaLib)
+                .task {
+                    // 位置落盘桥：同步写回 SwiftData（海报墙进度条/续播）
+                    library.onPositionSave = { url, seconds in
+                        let ctx = container.mainContext
+                        var desc = FetchDescriptor<MediaItem>(
+                            predicate: #Predicate { $0.path == url.path }
+                        )
+                        desc.fetchLimit = 1
+                        if let item = try? ctx.fetch(desc).first {
+                            item.resumeSeconds = seconds
+                            item.playedAt = Date()
+                            try? ctx.save()
+                        }
+                    }
+
+                    // 启动：恢复旧播放队列 → 扫描资料库 → 刮削
+                    library.restoreFromDisk()
+                    await mediaLib.scanAndScrape()
+
+                    // 调试辅助：CLEARPLAY_TEST_FILE=/path/to.mp4 自动加载
+                    if let path = ProcessInfo.processInfo.environment["CLEARPLAY_TEST_FILE"] {
+                        debugLog("autoload: \(path)")
+                        library.add(urls: [URL(fileURLWithPath: path)])
+                    }
+                    // 调试辅助：CLEARPLAY_TEST_FOLDER=/path/to/dir 自动添加资料库目录
+                    if let path = ProcessInfo.processInfo.environment["CLEARPLAY_TEST_FOLDER"] {
+                        debugLog("test folder: \(path)")
+                        mediaLib.addFolder(url: URL(fileURLWithPath: path))
+                    }
+                }
+                .onChange(of: scenePhase) { _, phase in
+                    // iOS 退后台时落盘播放位置
+                    if phase == .background {
+                        library.persist()
+                    }
+                }
+        }
+        #if os(macOS)
+        .defaultSize(width: 1100, height: 700)
+        #endif
+    }
+}

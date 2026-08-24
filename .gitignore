@@ -1,0 +1,26 @@
+# Xcode / macOS
+.DS_Store
+xcuserdata/
+*.xcuserstate
+DerivedData/
+build/
+*.ipa
+*.dSYM
+
+# xcodegen 生成物不需要忽略（project.yml 是源）
+ClearPlay.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/
+.build/
+
+# SwiftData 本地库（不属于代码）
+*.store
+*.store-shm
+*.store-wal
+
+# 误建的旧工程残留
+ClearPaly/
+
+# opencode 本地工具与技能缓存
+.opencode/
+
+# 设计系统生成缓存（如需入库可删除此行）
+design-system/**/pages/

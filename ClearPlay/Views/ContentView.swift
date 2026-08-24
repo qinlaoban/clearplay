@@ -1,0 +1,104 @@
+import SwiftUI
+import SwiftData
+import UniformTypeIdentifiers
+
+/// 侧栏导航分区
+enum SidebarSection: String, CaseIterable, Hashable {
+    case home = "首页"
+    case movies = "电影"
+    case shows = "剧集"
+    case favorites = "收藏"
+    case settings = "设置"
+
+    var icon: String {
+        switch self {
+        case .home: "house.fill"
+        case .movies: "film.fill"
+        case .shows: "tv.fill"
+        case .favorites: "heart.fill"
+        case .settings: "gearshape.fill"
+        }
+    }
+}
+
+/// 主界面：NavigationSplitView 侧栏 + 内容分区 + 全屏播放器
+struct ContentView: View {
+    @Environment(LibraryViewModel.self) private var library
+    @Environment(MediaLibraryViewModel.self) private var media
+
+    @State private var section: SidebarSection? = .home
+    @State private var showFolderImporter = false
+
+    var body: some View {
+        NavigationSplitView {
+            sidebar
+        } detail: {
+            detail
+        }
+        .cpTheme()
+        .background(.cpBackground)
+        // 海报/详情页导航目标
+        .navigationDestination(for: MediaItem.self) { item in
+            MediaDetailView(item: item)
+        }
+        .fileImporter(
+            isPresented: $showFolderImporter,
+            allowedContentTypes: [.folder],
+            allowsMultipleSelection: false
+        ) { result in
+            if case .success(let urls) = result, let url = urls.first {
+                media.addFolder(url: url)
+            }
+        }
+        // 播放器覆盖层：current 非空时铺满窗口
+        .overlay {
+            if let item = library.current {
+                PlayerView(item: item, library: library)
+                    .id(item.id)
+                    .background(.black)
+                    .transition(.opacity)
+                    .zIndex(10)
+            }
+        }
+    }
+
+    // MARK: - 侧栏
+
+    private var sidebar: some View {
+        List(selection: $section) {
+            ForEach(SidebarSection.allCases, id: \.self) { s in
+                Label(s.rawValue, systemImage: s.icon)
+                    .tag(s)
+            }
+
+            Section("来源") {
+                if media.isScanning {
+                    Label("扫描中…", systemImage: "arrow.triangle.2.circlepath")
+                        .foregroundStyle(.cpTextSubtle)
+                }
+                Button {
+                    showFolderImporter = true
+                } label: {
+                    Label("添加文件夹…", systemImage: "plus")
+                }
+            }
+        }
+        .navigationTitle("ClearPlay")
+        #if os(macOS)
+        .frame(minWidth: 220)
+        #endif
+    }
+
+    // MARK: - 内容区
+
+    @ViewBuilder
+    private var detail: some View {
+        switch section {
+        case .home, nil: HomeView()
+        case .movies: MediaGridView(kind: .movie, title: "电影")
+        case .shows: MediaGridView(kind: .episode, title: "剧集")
+        case .favorites: MediaGridView(favoritesOnly: true)
+        case .settings: SettingsView()
+        }
+    }
+}
