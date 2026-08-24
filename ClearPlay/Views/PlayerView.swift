@@ -69,6 +69,17 @@ struct PlayerView: View {
 
             controlOverlay
 
+            // 键盘快捷键载体（必须在控制层外：控制条隐藏时 allowsHitTesting(false) 会禁掉快捷键）
+            Button {
+                vm.volume = min(1, vm.volume + 0.1)
+            } label: { EmptyView() }
+            .keyboardShortcut(.upArrow, modifiers: [])
+
+            Button {
+                vm.volume = max(0, vm.volume - 0.1)
+            } label: { EmptyView() }
+            .keyboardShortcut(.downArrow, modifiers: [])
+
             // 连播浮层：当前集播完后倒计时自动播放下一集
             if let next = upNextItem {
                 upNextOverlay(next)
@@ -335,17 +346,6 @@ struct PlayerView: View {
                 }
                 .help("画中画")
             }
-
-            // 键盘上下方向键调音量（隐藏快捷键载体）
-            Button {
-                vm.volume = min(1, vm.volume + 0.1)
-            } label: { EmptyView() }
-            .keyboardShortcut(.upArrow, modifiers: [])
-
-            Button {
-                vm.volume = max(0, vm.volume - 0.1)
-            } label: { EmptyView() }
-            .keyboardShortcut(.downArrow, modifiers: [])
         }
         .buttonStyle(.plain)
         .foregroundStyle(.white)

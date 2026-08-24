@@ -69,12 +69,14 @@ extension Font {
 /// 主行动按钮（白底黑字，播放/导入等主 CTA）
 struct PrimaryButtonStyle: ButtonStyle {
     var tint: Color = .white
+    /// 大号（详情页主 CTA）
+    var large: Bool = false
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.cpButton)
-            .padding(.horizontal, 22)
-            .padding(.vertical, 10)
+            .padding(.horizontal, large ? 30 : 22)
+            .padding(.vertical, large ? 13 : 10)
             .background(Capsule().fill(tint.opacity(configuration.isPressed ? 0.75 : 1)))
             .foregroundStyle(.black)
             .opacity(configuration.isPressed ? 0.85 : 1)

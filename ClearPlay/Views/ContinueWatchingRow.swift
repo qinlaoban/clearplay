@@ -56,7 +56,10 @@ struct ContinueWatchingCard: View {
             }
             .buttonStyle(.plain)
             .padding(8)
-            .opacity(hovered ? 1 : 0.85)
+            // macOS 悬停浮现；iOS 无悬停，常显
+            #if os(macOS)
+            .opacity(hovered ? 1 : 0)
+            #endif
             .help("播放")
         }
         #if os(macOS)

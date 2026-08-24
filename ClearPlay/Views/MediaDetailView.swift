@@ -143,9 +143,7 @@ struct MediaDetailView: View {
             Button(action: play) {
                 Label(item.inProgress ? "继续播放" : "播放", systemImage: "play.fill")
             }
-            .buttonStyle(PrimaryButtonStyle())
-            // 主 CTA 放大一号
-            .scaleEffect(x: 1.1, y: 1.1)
+            .buttonStyle(PrimaryButtonStyle(large: true))
 
             if item.kind == .episode && episodes.count > 1 {
                 Button(action: playAll) {

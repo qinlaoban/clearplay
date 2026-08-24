@@ -236,10 +236,11 @@ struct ErrorBanner: View {
         )
         .shadow(color: .black.opacity(0.4), radius: 12)
         .transition(.move(edge: .bottom).combined(with: .opacity))
-        .onAppear {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 8) {
-                withAnimation { onDismiss() }
-            }
+        // 用 task(id:) 保证新消息替换旧消息时计时器重置
+        .task(id: message) {
+            try? await Task.sleep(for: .seconds(8))
+            guard !Task.isCancelled else { return }
+            onDismiss()
         }
     }
 }

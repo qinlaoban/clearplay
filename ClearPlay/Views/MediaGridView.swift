@@ -19,7 +19,6 @@ struct MediaGridView: View {
     let title: String
     var favoritesOnly: Bool = false
 
-    @State private var searchText = ""
     @State private var sortOrder: LibrarySort = .title
     @State private var isList = false
 
@@ -47,11 +46,6 @@ struct MediaGridView: View {
     private var items: [MediaItem] {
         let base = favoritesOnly ? allItems : allItems.filter { $0.kind == kind }
         var result = base
-        if !searchText.isEmpty {
-            result = result.filter {
-                $0.displayTitle.localizedCaseInsensitiveContains(searchText)
-            }
-        }
         switch sortOrder {
         case .title:
             result.sort { $0.displayTitle < $1.displayTitle }
@@ -72,15 +66,11 @@ struct MediaGridView: View {
             if items.isEmpty {
                 ContentUnavailableView {
                     Label(
-                        searchText.isEmpty
-                            ? (favoritesOnly ? "还没有收藏" : "没有影片")
-                            : "未找到「\(searchText)」",
-                        systemImage: searchText.isEmpty ? "film.stack" : "magnifyingglass"
+                        favoritesOnly ? "还没有收藏" : "没有影片",
+                        systemImage: "film.stack"
                     )
                 } description: {
-                    Text(searchText.isEmpty
-                        ? (favoritesOnly ? "在详情页点击 ♥ 即可收藏" : "在侧栏添加文件夹以导入影片")
-                        : "换个关键词试试")
+                    Text(favoritesOnly ? "在详情页点击 ♥ 即可收藏" : "在侧栏添加文件夹以导入影片")
                 }
                 .background(.cpBackground)
             } else {
@@ -114,7 +104,7 @@ struct MediaGridView: View {
             }
         }
         .navigationTitle(title)
-        .searchable(text: $searchText, prompt: "搜索 \(title)")
+        // 搜索已由全局搜索（ContentView 工具栏）承担，避免嵌套双搜索框
         .toolbar {
             ToolbarItemGroup {
                 Menu {
