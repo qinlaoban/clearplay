@@ -3,6 +3,9 @@ import SwiftData
 import AVFoundation
 import Observation
 
+/// AVFoundation 私有常量名（官方未暴露，字符串等价可用）
+private let AVURLAssetHTTPHeaderFieldsKey = "AVURLAssetHTTPHeaderFieldsKey"
+
 /// 媒体库视图模型：资料库目录管理、文件扫描入库、TMDB 刮削调度
 @MainActor
 @Observable
@@ -128,7 +131,10 @@ final class MediaLibraryViewModel {
         do {
             for folder in folders {
                 guard let dirURL = folder.resolve() else { continue }
-                let files = try FolderScanner.scan(folder: dirURL)
+                // 递归扫描放后台线程，避免大目录遍历卡住主线程
+                let files = try await Task.detached(priority: .userInitiated) {
+                    try FolderScanner.scan(folder: dirURL)
+                }.value
                 let scannedPaths = Set(files.map { $0.url.path })
 
                 for file in files {
@@ -158,12 +164,17 @@ final class MediaLibraryViewModel {
         }
     }
 
-    private func loadDuration(url: URL) async -> Double {
+    private func loadDuration(url: URL, headers: [String: String] = [:]) async -> Double {
         // 远程源加 15s 超时，避免慢速服务器阻塞扫描
         if url.scheme == "http" || url.scheme == "https" {
             return await withTaskGroup(of: Double.self) { group in
-                group.addTask { [url] in
-                    let asset = AVURLAsset(url: url)
+                group.addTask { [url, headers] in
+                    var opts: [String: Any] = [:]
+                    if !headers.isEmpty {
+                        // WebDAV 鉴权：时长探测请求同样要带 Authorization，否则 401 得到错误时长
+                        opts[AVURLAssetHTTPHeaderFieldsKey] = headers
+                    }
+                    let asset = AVURLAsset(url: url, options: opts)
                     guard let d = try? await asset.load(.duration), d.seconds.isFinite else { return 0 }
                     return d.seconds
                 }
@@ -262,6 +273,7 @@ final class MediaLibraryViewModel {
 
             let bgContext = ModelContext(container)
             let folderTag = Self.webdavFolderPrefix + server.id.uuidString
+            let authHeaders = RemoteAuthStore.headers(for: client.baseURL)
             var addedCount = 0
             for video in videos {
                 let key = video.url.absoluteString
@@ -271,9 +283,18 @@ final class MediaLibraryViewModel {
 
                 let parsed = FilenameParser.parse(video.name)
                 let item = MediaItem(path: key, folderPath: folderTag, parsed: parsed)
-                item.durationSeconds = await loadDuration(url: video.url)
+                item.durationSeconds = await loadDuration(url: video.url, headers: authHeaders)
                 bgContext.insert(item)
                 addedCount += 1
+            }
+
+            // 清理远端已删除文件的条目
+            let scannedKeys = Set(videos.map { $0.url.absoluteString })
+            let staleDesc = FetchDescriptor<MediaItem>(predicate: #Predicate { $0.folderPath == folderTag })
+            for stale in try bgContext.fetch(staleDesc) where !scannedKeys.contains(stale.path) {
+                PosterStore.remove(stale.posterFile)
+                PosterStore.remove(stale.backdropFile)
+                bgContext.delete(stale)
             }
             try bgContext.save()
             debugLog("webdav import: \(addedCount) new / \(videos.count) found")
@@ -326,6 +347,7 @@ final class MediaLibraryViewModel {
             return
         }
         item.scrapedAt = nil
+        item.scrapeAttempts = 0
         item.tmdbID = nil
         let service = TMDBService(apiKey: key)
         await scrape(item, service: service, context: container.mainContext)
@@ -334,11 +356,10 @@ final class MediaLibraryViewModel {
 
     /// 单条刮削：电影搜 movie；剧集搜 tv 后把剧级海报套用到全部分集
     private func scrape(_ item: MediaItem, service: TMDBService, context: ModelContext) async {
-        item.scrapedAt = Date() // 无论成败都标记，避免反复重试坏条目
         switch item.kind {
         case .movie:
             guard let result = try? await service.searchMovie(title: item.title, year: item.year) else {
-                debugLog("scrape no match: \(item.path)")
+                markScrapeFailed(item)
                 return
             }
             item.tmdbID = result.tmdbID
@@ -352,11 +373,12 @@ final class MediaLibraryViewModel {
                 service, remote: result.backdropPath,
                 cacheName: PosterStore.fileName(tmdbID: result.tmdbID, kind: "backdrop"), width: 1280
             )
+            item.scrapedAt = Date()
 
         case .episode:
             let name = item.seriesName ?? item.title
             guard let result = try? await service.searchTV(title: name, year: nil) else {
-                debugLog("scrape no match: \(item.path)")
+                markScrapeFailed(item)
                 return
             }
             item.tmdbID = result.tmdbID
@@ -379,7 +401,15 @@ final class MediaLibraryViewModel {
                     sibling.posterFile = item.posterFile
                 }
             }
+            item.scrapedAt = Date()
         }
+    }
+
+    /// 刮削失败：计数重试，连续 5 次失败后标记放弃（不再自动请求）
+    private func markScrapeFailed(_ item: MediaItem) {
+        item.scrapeAttempts += 1
+        if item.scrapeAttempts >= 5 { item.scrapedAt = Date() }
+        debugLog("scrape failed (\(item.scrapeAttempts)): \(item.path)")
     }
 
     /// 下载 TMDB 图片到缓存，失败返回 nil

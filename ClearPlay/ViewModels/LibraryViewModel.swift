@@ -3,6 +3,7 @@ import AVFoundation
 import Observation
 
 /// 媒体库视图模型：管理导入列表、元数据缓存、持久化与播放位置记忆
+@MainActor
 @Observable
 final class LibraryViewModel {
     private(set) var items: [VideoItem] = []
@@ -30,7 +31,11 @@ final class LibraryViewModel {
 
     // MARK: - 持久化
 
-    private struct PersistedItem: Codable { var bookmark: Data }
+    private struct PersistedItem: Codable {
+        var bookmark: Data?
+        /// 远程条目（http/https 无法建书签）直接存完整 URL
+        var remoteURL: String?
+    }
 
     private struct LibraryStore: Codable {
         var items: [PersistedItem] = []
@@ -53,20 +58,27 @@ final class LibraryViewModel {
 
         resumePositions = store.positions
         for entry in store.items {
-            guard let url = resolve(entry.bookmark) else { continue }
-            append(url: url)
+            if let remote = entry.remoteURL, let url = URL(string: remote) {
+                append(url: url)
+            } else if let bookmark = entry.bookmark, let url = resolve(bookmark) {
+                append(url: url)
+            }
         }
     }
 
     func persist() {
-        let entries = items.compactMap { item -> PersistedItem? in
+        let entries = items.map { item -> PersistedItem in
+            // 远程条目直接存 URL 字符串
+            if !item.url.isFileURL {
+                return PersistedItem(bookmark: nil, remoteURL: item.url.absoluteString)
+            }
             #if os(macOS)
             let opts: URL.BookmarkCreationOptions = [.withSecurityScope]
             #else
             let opts: URL.BookmarkCreationOptions = []
             #endif
-            guard let data = try? item.url.bookmarkData(options: opts) else { return nil }
-            return PersistedItem(bookmark: data)
+            let data = try? item.url.bookmarkData(options: opts)
+            return PersistedItem(bookmark: data, remoteURL: nil)
         }
         let store = LibraryStore(items: entries, positions: resumePositions)
         if let data = try? JSONEncoder().encode(store) {

@@ -1,4 +1,5 @@
 import Foundation
+import CryptoKit
 import AetherEngine
 
 /// WebDAV 目录条目
@@ -302,6 +303,12 @@ enum RemoteSubtitleFinder {
         }
     }
 
+    /// 字符串 SHA256 十六进制（稳定缓存名用）
+    private static func sha256(_ string: String) -> String {
+        let digest = SHA256.hash(data: Data(string.utf8))
+        return digest.map { String(format: "%02x", $0) }.joined()
+    }
+
     /// 拉取视频所在远程目录列表并下载命中的字幕到本地缓存
     static func sidecars(for videoURL: URL, client: WebDAVClient) async -> [ExternalSubtitleTrack] {
         guard videoURL.scheme == "http" || videoURL.scheme == "https" else { return [] }
@@ -311,8 +318,8 @@ enum RemoteSubtitleFinder {
         var tracks: [ExternalSubtitleTrack] = []
         for candidate in candidates(for: videoURL, in: entries) {
             let ext = subtitleExt(candidate.url.pathExtension.lowercased()) ?? "srt"
-            // 缓存名带 URL 哈希避免不同目录同名冲突
-            let cacheName = "\(abs(candidate.url.absoluteString.hashValue)).\(ext)"
+            // 缓存名用 SHA256（hashValue 每次启动随机化，会导致缓存失效重下）
+            let cacheName = "\(sha256(candidate.url.absoluteString)).\(ext)"
             let localURL = SubtitleStore.localURL(for: cacheName)
             if !FileManager.default.fileExists(atPath: localURL.path) {
                 guard await download(candidate.url, to: localURL, client: client) else { continue }
