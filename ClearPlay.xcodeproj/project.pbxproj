@@ -31,6 +31,7 @@
 		425B89F47F3B24EDC1237E1E /* TMDBService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49A8134B4815E2D8DAC4A55B /* TMDBService.swift */; };
 		43DF68382882966461A76E9B /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFE55C4C8F3F4BED35614ECF /* ContentView.swift */; };
 		48D9FD62234C6E488C6C59E2 /* FilenameParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF1E84E29E07363B9ECED881 /* FilenameParserTests.swift */; };
+		496BCC38F97150C059F16AE2 /* CPExceptionCatcher.m in Sources */ = {isa = PBXBuildFile; fileRef = 385973164BB7CD36B9C5AAC1 /* CPExceptionCatcher.m */; };
 		501DCF11827B0F851807F8DB /* MediaDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADE3CEA3FEDCB4ED890B8B0E /* MediaDetailView.swift */; };
 		50C1EBD950E3C057B111BEDB /* Log.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6639BC6A6667D6275C4A349 /* Log.swift */; };
 		51A4C882E31BB8A468BDB713 /* PosterCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 953D168C15E9447556DABCF9 /* PosterCard.swift */; };
@@ -67,6 +68,7 @@
 		A83E4D0AE7738D487244D88A /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3222C06250928130D5D0CC70 /* SettingsView.swift */; };
 		ABFF451658C3082D57924847 /* ShimmerModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A5D3F7830C5B3FC0952B199 /* ShimmerModifier.swift */; };
 		AF5E7D9A2C5426C2EEA1803F /* SpotlightIndexer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D10157C3EC41D8ABCC7FDC23 /* SpotlightIndexer.swift */; };
+		B09CF904A665535173711B0E /* CPExceptionCatcher.m in Sources */ = {isa = PBXBuildFile; fileRef = 385973164BB7CD36B9C5AAC1 /* CPExceptionCatcher.m */; };
 		B1C38F6DE158D37D1F9D6C9F /* MediaGridView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E0EC39366947F67B0DFDC04 /* MediaGridView.swift */; };
 		B474B614024129EB43D36367 /* MediaQueueTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F614A332F41E6800D3848D70 /* MediaQueueTests.swift */; };
 		B980AC1C71AA07FE520F977E /* VideoItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = B92CB17C4B70D89BDD117045 /* VideoItem.swift */; };
@@ -107,11 +109,14 @@
 		16F287A8D832542041FA9256 /* SubtitleServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubtitleServiceTests.swift; sourceTree = "<group>"; };
 		1DBD1C047018353940AD781D /* WebDAVBrowserView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebDAVBrowserView.swift; sourceTree = "<group>"; };
 		23DF76D8E22CB4939F7B60C2 /* ClearPlay-iOS.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = "ClearPlay-iOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		2DDA70462D263AB352D57C9E /* ClearPlay-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "ClearPlay-Bridging-Header.h"; sourceTree = "<group>"; };
 		2E0190DA172964B74D505CCC /* Format.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Format.swift; sourceTree = "<group>"; };
 		3222C06250928130D5D0CC70 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		323D04C68F2F6939F9A08D31 /* MediaLibraryViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaLibraryViewModelTests.swift; sourceTree = "<group>"; };
 		325D664144C99478B8838BE8 /* CloudSyncServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudSyncServiceTests.swift; sourceTree = "<group>"; };
 		32A983E19FE4F46B065E408D /* ClearPlay-macOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "ClearPlay-macOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		38172C21EFC7141F8A15D24B /* CPExceptionCatcher.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CPExceptionCatcher.h; sourceTree = "<group>"; };
+		385973164BB7CD36B9C5AAC1 /* CPExceptionCatcher.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CPExceptionCatcher.m; sourceTree = "<group>"; };
 		3E0EC39366947F67B0DFDC04 /* MediaGridView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaGridView.swift; sourceTree = "<group>"; };
 		4306E3456DC34F1953B20ED6 /* SubtitleService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubtitleService.swift; sourceTree = "<group>"; };
 		49A8134B4815E2D8DAC4A55B /* TMDBService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TMDBService.swift; sourceTree = "<group>"; };
@@ -246,6 +251,8 @@
 		79829856DA8B70954F40EA49 /* Utils */ = {
 			isa = PBXGroup;
 			children = (
+				38172C21EFC7141F8A15D24B /* CPExceptionCatcher.h */,
+				385973164BB7CD36B9C5AAC1 /* CPExceptionCatcher.m */,
 				2E0190DA172964B74D505CCC /* Format.swift */,
 				679D5A475C6C5ED8EB998C89 /* KeychainStore.swift */,
 				D6639BC6A6667D6275C4A349 /* Log.swift */,
@@ -260,6 +267,7 @@
 				31DE0C93D01FFAE33D6E7BC2 /* Intents */,
 				FD70C2722B76996FAC91F0E9 /* Models */,
 				B22BAEACEB31C8B7FAFFD520 /* Services */,
+				AD14067F03C103077836FE6C /* Support */,
 				79829856DA8B70954F40EA49 /* Utils */,
 				5DF34FC7C683371CCEAACC1C /* ViewModels */,
 				2FF79DA75E25DA624BDC039E /* Views */,
@@ -282,6 +290,14 @@
 				5AC435869E5E606C514230DA /* WebDAVClientTests.swift */,
 			);
 			path = ClearPlayTests;
+			sourceTree = "<group>";
+		};
+		AD14067F03C103077836FE6C /* Support */ = {
+			isa = PBXGroup;
+			children = (
+				2DDA70462D263AB352D57C9E /* ClearPlay-Bridging-Header.h */,
+			);
+			path = Support;
 			sourceTree = "<group>";
 		};
 		B22BAEACEB31C8B7FAFFD520 /* Services */ = {
@@ -431,6 +447,7 @@
 			files = (
 				372F10672ACD8C4BB7D2845E /* AppDatabase.swift in Sources */,
 				E567E5BB05D58C3321613AA3 /* ArtworkImage.swift in Sources */,
+				B09CF904A665535173711B0E /* CPExceptionCatcher.m in Sources */,
 				13C45918E7CBD0DD2982CC1B /* ClearPlayApp.swift in Sources */,
 				5B5A498BD8538825DEF9DF46 /* CloudSyncService.swift in Sources */,
 				43DF68382882966461A76E9B /* ContentView.swift in Sources */,
@@ -472,6 +489,7 @@
 			files = (
 				04BEE7C06AB9B96E5E81108F /* AppDatabase.swift in Sources */,
 				9EA20598207A43463B5757C3 /* ArtworkImage.swift in Sources */,
+				496BCC38F97150C059F16AE2 /* CPExceptionCatcher.m in Sources */,
 				C20C6CEB944695111A8A10FD /* ClearPlayApp.swift in Sources */,
 				0B8AC1A2A76B15E8824A427F /* CloudSyncService.swift in Sources */,
 				2126D8810E92B29013417FBD /* ContentView.swift in Sources */,
@@ -592,6 +610,7 @@
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OBJC_BRIDGING_HEADER = "ClearPlay/Support/ClearPlay-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.10;
 			};
@@ -665,6 +684,7 @@
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OBJC_BRIDGING_HEADER = "ClearPlay/Support/ClearPlay-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 5.10;
 			};

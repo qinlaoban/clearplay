@@ -8,7 +8,9 @@ build/
 *.dSYM
 
 # xcodegen 生成物不需要忽略（project.yml 是源）
-ClearPlay.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/
+ClearPlay.xcodeproj/project.xcworkspace/xcshareddata/xcuserdata/
+# SPM 依赖锁定版本入库（保证构建可复现）
+!ClearPlay.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/
 .build/
 
 # SwiftData 本地库（不属于代码）

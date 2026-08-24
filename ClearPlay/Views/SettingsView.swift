@@ -7,6 +7,8 @@ struct SettingsView: View {
     @State private var osApiKey = UserDefaults.standard.string(forKey: "opensubtitlesApiKey") ?? ""
     @State private var osUsername = OpenSubtitlesAccount.username
     @State private var osPassword = ""
+    /// 密码不回显：只有用户编辑过才写 Keychain，空值=清除
+    @State private var passwordEdited = false
 
     @Environment(MediaLibraryViewModel.self) private var media
     @Query(sort: \LibraryFolder.addedAt) private var folders: [LibraryFolder]
@@ -104,8 +106,9 @@ struct SettingsView: View {
                     .textFieldStyle(.roundedBorder)
                 TextField("用户名（可选，下载字幕需要）", text: $osUsername)
                     .textFieldStyle(.roundedBorder)
-                SecureField("密码", text: $osPassword)
+                SecureField("密码（留空保存即清除）", text: $osPassword)
                     .textFieldStyle(.roundedBorder)
+                    .onChange(of: osPassword) { _, _ in passwordEdited = true }
                     .onSubmit(saveAccount)
                 Text("在 https://www.opensubtitles.com 免费申请 API Key。填写用户名密码后才能下载字幕文件；仅搜索无需登录。")
                     .font(.cpCaption)
@@ -168,8 +171,9 @@ struct SettingsView: View {
     private func saveAccount() {
         UserDefaults.standard.set(osApiKey, forKey: "opensubtitlesApiKey")
         OpenSubtitlesAccount.setUsername(osUsername)
-        if !osPassword.isEmpty {
+        if passwordEdited {
             OpenSubtitlesAccount.setPassword(osPassword)
+            passwordEdited = false
         }
     }
 }

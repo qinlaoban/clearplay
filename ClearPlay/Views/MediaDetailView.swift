@@ -176,6 +176,14 @@ struct MediaDetailView: View {
             }
             .pickerStyle(.segmented)
             .labelsHidden()
+            // 默认选中当前条目所在季，其次最小季
+            .onAppear {
+                if let s = item.season, seasons.contains(s) {
+                    selectedSeason = s
+                } else if let first = seasons.first {
+                    selectedSeason = first
+                }
+            }
             .onChange(of: seasons) { _, newValue in
                 if !newValue.contains(selectedSeason), let first = newValue.first {
                     selectedSeason = first

@@ -72,28 +72,32 @@ VidHub（Oka Apps 出品）的核心卖点：
 
 ## 三、开发计划
 
-### Phase 1：本地影视库 + 海报墙（当前阶段）
-- [ ] SwiftData 建模：MediaItem / Series / Season / Episode / PlayRecord
-- [ ] 本地文件夹授权导入（security-scoped bookmark，支持递归扫描）
-- [ ] 文件名解析器（`Movie.2023.1080p.x264.mkv` / `剧名 S01E02` 正则规则集）
-- [ ] TMDB 刮削服务（搜索匹配 + 海报/背景图/简介/评分缓存）
-- [ ] 海报墙 UI：电影网格 + 详情页 + 继续观看横滑区
-- [ ] 电视剧分季分集展示
+> 进度速览（2026-08）：Phase 1 已完成（本地库/刮削/海报墙）；Phase 2 的 WebDAV 已完成（SMB 未做）；
+> Phase 3 中在线字幕、连播、缩略图预览、iCloud 进度同步已完成；App Intents + Spotlight 已上线。
+> iOS target 已随主开发双平台编译验证。
+
+### Phase 1：本地影视库 + 海报墙 ✅
+- [x] SwiftData 建模：MediaItem / LibraryFolder / WebDAVServer
+- [x] 本地文件夹授权导入（security-scoped bookmark，支持递归扫描）
+- [x] 文件名解析器（`Movie.2023.1080p.x264.mkv` / `剧名 S01E02` 正则规则集）
+- [x] TMDB 刮削服务（搜索匹配 + 海报/背景图/简介/评分缓存）
+- [x] 海报墙 UI：电影网格 + 详情页 + 继续观看横滑区
+- [x] 电视剧分季分集展示
 
 ### Phase 2：网络来源
 - [ ] MediaSource 协议抽象 + 来源管理设置页
 - [ ] SMB（AetherEngineSMB）：浏览 + 扫描入库 + 远程流播
-- [ ] WebDAV：同上（兼容 Alist/OpenList，网盘用户主路径）
-- [ ] 远程文件的缩略图/时长探测（FrameExtractor）
+- [x] WebDAV：浏览 + 扫描入库 + 远程流播（兼容 Alist/OpenList，网盘用户主路径）
+- [x] 远程文件的缩略图/时长探测（FrameExtractor）
 - [ ] 弱网优化：起播探针预算（probesize）、缓冲策略
 
 ### Phase 3：观影体验完善
-- [ ] CloudKit 同步：播放进度 / 收藏 / 来源配置
-- [ ] 「继续观看」跨设备接力
-- [ ] 在线字幕搜索下载（OpenSubtitles）
+- [x] CloudKit 同步：播放进度（收藏/来源配置待做）
+- [x] 「继续观看」跨设备接力
+- [x] 在线字幕搜索下载（OpenSubtitles，含本地 sidecar 自动挂载）
 - [ ] 字幕样式设置（位置/颜色/描边/背景）
-- [ ] 自动连播下一集 + 片头跳过（记忆式）
-- [ ] 全局搜索
+- [x] 自动连播下一集（片头跳过待做）
+- [x] 全局搜索（库内搜索 + Spotlight/App Intents）
 
 ### Phase 4：媒体服务器
 - [ ] Emby/Jellyfin 接入（登录、媒体库浏览、元数据直读、已看状态回写）
