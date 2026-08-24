@@ -11,6 +11,7 @@ struct PlayerView: View {
     @State private var controlsVisible = true
     @State private var hideTask: Task<Void, Never>?
     @State private var lastSaved: Double = 0
+    @State private var showSubtitleSearch = false
 
     private func savePosition(at seconds: Double? = nil) {
         let t = seconds ?? vm.currentTime
@@ -67,6 +68,13 @@ struct PlayerView: View {
         .onChange(of: vm.currentTime) { _, newTime in
             if newTime - lastSaved > 5 || newTime < lastSaved - 0.5 {
                 savePosition(at: newTime)
+            }
+        }
+        .sheet(isPresented: $showSubtitleSearch) {
+            if let url = vm.currentVideoURL {
+                SubtitleSearchSheet(videoURL: url) { localURL, name, language in
+                    vm.addSubtitleTrack(url: localURL, name: name, language: language)
+                }
             }
         }
     }
@@ -166,6 +174,8 @@ struct PlayerView: View {
 
             if !vm.subtitleTracks.isEmpty {
                 subtitleMenu
+            } else {
+                subtitleSearchButton
             }
 
             speedMenu
@@ -240,11 +250,22 @@ struct PlayerView: View {
                     vm.selectSubtitleTrack(id: track.id)
                 }
             }
+            Divider()
+            subtitleSearchButton
         } label: {
             Image(systemName: "captions.bbox")
         }
         .foregroundStyle(.white)
         .help("字幕")
+    }
+
+    /// 打开在线字幕搜索
+    private var subtitleSearchButton: some View {
+        Button {
+            showSubtitleSearch = true
+        } label: {
+            Label("在线搜索字幕", systemImage: "magnifyingglass")
+        }
     }
 
     private func trackLabel(_ track: TrackInfo) -> String {

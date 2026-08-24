@@ -4,6 +4,9 @@ import SwiftData
 /// 设置页：TMDB API Key、资料库目录管理、重新扫描
 struct SettingsView: View {
     @AppStorage("tmdbApiKey") private var tmdbApiKey = ""
+    @State private var osApiKey = UserDefaults.standard.string(forKey: "opensubtitlesApiKey") ?? ""
+    @State private var osUsername = OpenSubtitlesAccount.username
+    @State private var osPassword = ""
 
     @Environment(MediaLibraryViewModel.self) private var media
     @Query(sort: \LibraryFolder.addedAt) private var folders: [LibraryFolder]
@@ -53,6 +56,19 @@ struct SettingsView: View {
                 }
             }
 
+            Section("在线字幕（OpenSubtitles）") {
+                TextField("API Key（opensubtitles.com 申请）", text: $osApiKey)
+                    .textFieldStyle(.roundedBorder)
+                TextField("用户名（可选，下载字幕需要）", text: $osUsername)
+                    .textFieldStyle(.roundedBorder)
+                SecureField("密码", text: $osPassword)
+                    .textFieldStyle(.roundedBorder)
+                    .onSubmit(saveAccount)
+                Text("在 https://www.opensubtitles.com 免费申请 API Key。填写用户名密码后才能下载字幕文件；仅搜索无需登录。")
+                    .font(.system(size: 11))
+                    .foregroundStyle(.cpTextSubtle)
+            }
+
             Section("维护") {
                 Button {
                     Task { await media.scanAndScrape() }
@@ -81,6 +97,8 @@ struct SettingsView: View {
         .formStyle(.grouped)
         .background(.cpBackground)
         .navigationTitle("设置")
+        .onDisappear { saveAccount() }
+        .onChange(of: osApiKey) { _, _ in saveAccount() }
         .fileImporter(
             isPresented: $showFolderImporter,
             allowedContentTypes: [.folder],
@@ -89,6 +107,15 @@ struct SettingsView: View {
             if case .success(let urls) = result, let url = urls.first {
                 media.addFolder(url: url)
             }
+        }
+    }
+
+    /// OpenSubtitles 配置持久化：Key 存 UserDefaults，账号存 Keychain
+    private func saveAccount() {
+        UserDefaults.standard.set(osApiKey, forKey: "opensubtitlesApiKey")
+        OpenSubtitlesAccount.setUsername(osUsername)
+        if !osPassword.isEmpty {
+            OpenSubtitlesAccount.setPassword(osPassword)
         }
     }
 }

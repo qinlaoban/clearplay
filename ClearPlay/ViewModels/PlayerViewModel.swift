@@ -58,18 +58,40 @@ final class PlayerViewModel {
     private func performLoad(url: URL, startPosition: Double?, engine: AetherEngine) async {
         isLoading = true
         do {
+            // 自动挂载同目录外挂字幕（Movie.zh.srt 等）
+            let sidecars = LocalSubtitleFinder.sidecars(for: url)
+            var options = LoadOptions()
+            options.externalSubtitles = sidecars
+
             if let startPosition {
-                try await engine.load(url: url, startPosition: startPosition)
+                try await engine.load(url: url, startPosition: startPosition, options: options)
             } else {
-                try await engine.load(url: url)
+                try await engine.load(url: url, options: options)
             }
             loadedURL = url
             setupPiPIfNeeded(engine: engine)
+
+            // 未启用任何字幕时自动激活第一个外挂轨道
+            if !sidecars.isEmpty, engine.activeSubtitleTrackIndex == nil,
+               let first = engine.subtitleTracks.first(where: { $0.isExternal }) {
+                engine.selectSubtitleTrack(index: first.id)
+            }
         } catch {
             isLoading = false
             playbackError = error.localizedDescription
         }
     }
+
+    /// 在线搜索下载的字幕即时挂载并激活
+    func addSubtitleTrack(url: URL, name: String, language: String?) {
+        guard let engine else { return }
+        let track = ExternalSubtitleTrack(url: url, name: name, language: language)
+        let info = engine.addExternalSubtitleTrack(track)
+        engine.selectSubtitleTrack(index: info.id)
+    }
+
+    /// 当前播放文件信息（供在线字幕搜索用）
+    var currentVideoURL: URL? { loadedURL }
 
     /// 订阅引擎与时钟的发布状态
     private func bind(engine: AetherEngine) {
