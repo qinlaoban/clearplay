@@ -19,7 +19,11 @@ enum FolderScanner {
         )
         while let raw = enumerator?.nextObject() as? URL {
             guard let values = try? raw.resourceValues(forKeys: Set(keys)) else { continue }
-            if values.isHidden == true || values.isSymbolicLink == true { continue }
+            if values.isHidden == true || values.isSymbolicLink == true {
+                // 隐藏目录/符号链接整个跳过（含子树）
+                enumerator?.skipDescendants()
+                continue
+            }
             if values.isDirectory == true {
                 // 跳过常见垃圾目录
                 if ["sample", "extras", "proof"].contains(raw.lastPathComponent.lowercased()) {

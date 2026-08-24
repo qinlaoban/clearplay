@@ -11,11 +11,55 @@ final class MediaLibraryViewModel {
     private(set) var isScraping = false
     /// 最近一次错误提示（UI 展示后手动置空）
     var lastError: String?
+    /// 散装文件导入完成回调（首个新增条目），用于自动开始播放
+    var onFilesImported: ((MediaItem) -> Void)?
 
     private let container: ModelContainer
 
     init(container: ModelContainer) {
         self.container = container
+    }
+
+    // MARK: - 单文件导入
+
+    /// 直接导入散装视频文件（不属于任何资料库目录）
+    func addFiles(urls: [URL]) {
+        let context = container.mainContext
+        var added: [MediaItem] = []
+        for url in urls {
+            let path = url.path
+            var desc = FetchDescriptor<MediaItem>(predicate: #Predicate { $0.path == path })
+            desc.fetchLimit = 1
+            if (try? context.fetch(desc).first) != nil { continue }
+
+            guard FilenameParser.videoExtensions.contains(url.pathExtension.lowercased()) else { continue }
+            _ = url.startAccessingSecurityScopedResource()
+            let parsed = FilenameParser.parse(url.lastPathComponent)
+            let item = MediaItem(path: path, folderPath: "", parsed: parsed)
+            context.insert(item)
+            added.append(item)
+        }
+        try? context.save()
+        if let first = added.first {
+            Task { [weak self] in
+                await self?.loadMissingDurations()
+                await self?.scrapePending()
+                self?.onFilesImported?(first)
+            }
+        } else {
+            lastError = "没有可导入的视频文件（可能已导入过）"
+        }
+    }
+
+    /// 为时长缺失的条目补充读取时长
+    private func loadMissingDurations() async {
+        let context = container.mainContext
+        let desc = FetchDescriptor<MediaItem>(predicate: #Predicate { $0.durationSeconds <= 0 })
+        guard let items = try? context.fetch(desc) else { return }
+        for item in items {
+            item.durationSeconds = await loadDuration(url: item.url)
+        }
+        try? context.save()
     }
 
     // MARK: - 资料库目录

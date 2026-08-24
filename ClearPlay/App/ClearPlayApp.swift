@@ -29,9 +29,25 @@ struct ClearPlayApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .modelContainer(container)
                 .environment(library)
                 .environment(mediaLib)
                 .task {
+                    // 导入散装文件后自动开始播放（队列按类型分组）
+                    mediaLib.onFilesImported = { item in
+                        let ctx = container.mainContext
+                        let all = (try? ctx.fetch(FetchDescriptor<MediaItem>())) ?? []
+                        let queue: [MediaItem]
+                        if item.kind == .episode, let series = item.seriesName {
+                            queue = all
+                                .filter { $0.kind == .episode && $0.seriesName == series }
+                                .sorted { ($0.season ?? 0, $0.episodeNumber ?? 0) < ($1.season ?? 0, $1.episodeNumber ?? 0) }
+                        } else {
+                            queue = all.filter { $0.kind == .movie }.sorted { $0.displayTitle < $1.displayTitle }
+                        }
+                        library.play(queue: queue.isEmpty ? [item] : queue, start: item)
+                    }
+
                     // 位置落盘桥：同步写回 SwiftData（海报墙进度条/续播）
                     library.onPositionSave = { url, seconds in
                         let ctx = container.mainContext

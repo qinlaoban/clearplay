@@ -43,3 +43,41 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.clearplay.app.mac
         ENABLE_HARDENED_RUNTIME: YES
+
+  ClearPlayTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - ClearPlayTests
+    dependencies:
+      - target: ClearPlay-macOS
+      - package: AetherEngine
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.clearplay.tests
+
+schemes:
+  ClearPlay-macOS:
+    build:
+      targets:
+        ClearPlay-macOS: all
+    run:
+      config: Debug
+
+  ClearPlay-iOS:
+    build:
+      targets:
+        ClearPlay-iOS: all
+    run:
+      config: Debug
+
+  ClearPlayTests:
+    build:
+      targets:
+        ClearPlay-macOS: all
+        ClearPlayTests: [test]
+    test:
+      config: Debug
+      gatherCoverageData: false
+      targets:
+        - ClearPlayTests

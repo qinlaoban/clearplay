@@ -28,6 +28,7 @@ struct ContentView: View {
 
     @State private var section: SidebarSection? = .home
     @State private var showFolderImporter = false
+    @State private var showFileImporter = false
 
     var body: some View {
         NavigationSplitView {
@@ -48,6 +49,15 @@ struct ContentView: View {
         ) { result in
             if case .success(let urls) = result, let url = urls.first {
                 media.addFolder(url: url)
+            }
+        }
+        .fileImporter(
+            isPresented: $showFileImporter,
+            allowedContentTypes: [.movie, .video, .mpeg4Movie],
+            allowsMultipleSelection: true
+        ) { result in
+            if case .success(let urls) = result {
+                media.addFiles(urls: urls)
             }
         }
         // 播放器覆盖层：current 非空时铺满窗口
@@ -79,7 +89,12 @@ struct ContentView: View {
                 Button {
                     showFolderImporter = true
                 } label: {
-                    Label("添加文件夹…", systemImage: "plus")
+                    Label("添加文件夹…", systemImage: "folder.badge.plus")
+                }
+                Button {
+                    showFileImporter = true
+                } label: {
+                    Label("导入视频文件…", systemImage: "plus")
                 }
             }
         }

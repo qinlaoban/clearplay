@@ -125,12 +125,12 @@ final class LibraryViewModel {
     }
 
     func index(of item: VideoItem) -> Int {
-        items.firstIndex { $0.id == item.id } ?? -1
+        items.firstIndex { $0.url == item.url } ?? -1
     }
 
-    /// 播放列表上/下一曲，越界返回 nil
+    /// 播放列表上/下一曲，越界返回 nil（按 URL 匹配，不依赖 UUID）
     func step(from item: VideoItem, offset: Int) -> VideoItem? {
-        guard let i = items.firstIndex(where: { $0.id == item.id }), i != -1 else { return nil }
+        guard let i = items.firstIndex(where: { $0.url == item.url }), i != -1 else { return nil }
         let next = i + offset
         return items.indices.contains(next) ? items[next] : nil
     }

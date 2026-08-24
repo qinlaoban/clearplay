@@ -74,22 +74,37 @@ enum FilenameParser {
             }
         }
 
-        // 2. 电影：标题在年份或第一个噪音词前截断
+        // 2. 电影：标题在最后一个年份或第一个噪音词前截断
+        // （取最后一年：兼容片名本身是年份的情况，如 "2012.2009.1080p"）
         let full = NSRange(name.startIndex..., in: name)
         var cutIndex = name.endIndex
-        if let ym = yearPattern.firstMatch(in: name, range: full),
-           let yr = Range(ym.range(at: 1), in: name), let year = Int(name[yr]),
-           (1900...2100).contains(year) {
-            cutIndex = yr.lowerBound
+        var releaseYear: Int?
+        var years: [(Range<String.Index>, Int)] = []
+        yearPattern.enumerateMatches(in: name, range: full) { m, _, _ in
+            guard let m, let r = Range(m.range(at: 1), in: name),
+                  let y = Int(name[r]), (1900...2100).contains(y) else { return }
+            years.append((r, y))
         }
-        if let nm = noisePattern.firstMatch(in: name, range: full),
-           let nr = Range(nm.range, in: name),
-           nr.lowerBound < cutIndex {
+        if let lastYear = years.last {
+            cutIndex = lastYear.0.lowerBound
+            releaseYear = lastYear.1
+        }
+        // 噪音词截断：跳过纯年份的匹配（避免把切点拉回第一个年份）
+        let yearRanges = Set(years.map { NSRange($0.0, in: name) })
+        var allNoise: [NSRange] = []
+        noisePattern.enumerateMatches(in: name, range: full) { m, _, _ in
+            guard let m else { return }
+            allNoise.append(m.range)
+        }
+        let noiseCut = allNoise
+            .first { !yearRanges.contains($0) }
+            .flatMap { Range($0, in: name) }
+        if let nr = noiseCut, nr.lowerBound < cutIndex {
             cutIndex = nr.lowerBound
         }
         let rawTitle = String(name[..<cutIndex])
         let title = cleanTitle(rawTitle) ?? cleanTitleLoose(name)
-        return Result(title: title, year: findYear(in: name))
+        return Result(title: title, year: releaseYear)
     }
 
     /// 清洗标题尾部残留的连接符与空白
@@ -103,10 +118,17 @@ enum FilenameParser {
     /// 兜底：整串去噪音词后作为标题（避免空标题）
     private static func cleanTitleLoose(_ s: String) -> String {
         let range = NSRange(s.startIndex..., in: s)
-        var out = s
+        // 先收集全部匹配，再从后往前替换（边枚举边改会错位）
+        var ranges: [NSRange] = []
         noisePattern.enumerateMatches(in: s, range: range) { m, _, _ in
-            guard let m, let r = Range(m.range, in: out) else { return }
-            out.replaceSubrange(r, with: "\u{0}")
+            guard let m else { return }
+            ranges.append(m.range)
+        }
+        var out = s
+        for r in ranges.reversed() {
+            if let r = Range(r, in: out) {
+                out.replaceSubrange(r, with: "\u{0}")
+            }
         }
         return out
             .replacingOccurrences(of: "\u{0}", with: "")

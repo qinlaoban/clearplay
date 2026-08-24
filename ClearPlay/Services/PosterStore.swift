@@ -9,9 +9,9 @@ enum PosterStore {
         return dir
     }()
 
-    /// 生成规范化的缓存文件名
-    static func fileName(tmdbID: Int, kind: String, ext: String = "jpg") -> String {
-        "\(tmdbID)-\(kind).\(ext)"
+    /// 生成规范化的缓存文件名（不含扩展名，下载时按实际格式追加）
+    static func fileName(tmdbID: Int, kind: String) -> String {
+        "\(tmdbID)-\(kind)"
     }
 
     static func localURL(for name: String) -> URL {
