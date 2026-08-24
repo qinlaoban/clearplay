@@ -31,9 +31,9 @@ struct HomeView: View {
                     }
 
                     if !recent.isEmpty {
-                    Text("最近添加")
-                        .font(.cpHeading)
-                        .foregroundStyle(.cpText)
+                        Text("最近添加")
+                            .font(.cpHeading)
+                            .foregroundStyle(.cpText)
                         posterWall(recent)
                     }
                 }

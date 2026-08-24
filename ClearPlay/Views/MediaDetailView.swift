@@ -124,8 +124,8 @@ struct MediaDetailView: View {
     private var actionRow: some View {
         HStack(spacing: 14) {
             Button(action: play) {
-                    Label(item.inProgress ? "继续播放" : "播放", systemImage: "play.fill")
-                        .font(.cpButton)
+                Label(item.inProgress ? "继续播放" : "播放", systemImage: "play.fill")
+                    .font(.cpButton)
                     .foregroundStyle(.black)
                     .padding(.horizontal, 22)
                     .padding(.vertical, 10)
