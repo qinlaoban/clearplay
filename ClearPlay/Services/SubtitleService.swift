@@ -172,7 +172,11 @@ struct OpenSubtitlesClient {
         let link = try JSONDecoder().decode(Payload.self, from: data).link
         guard let url = URL(string: link) else { throw SubtitleError.noDownloadLink }
 
-        let (fileData, _) = try await session.data(from: url)
+        let (fileData, fileResponse) = try await session.data(from: url)
+        // 临时直链也可能失效，落盘前校验状态码
+        if let http = fileResponse as? HTTPURLResponse, !(200..<300).contains(http.statusCode) {
+            throw SubtitleError.http(http.statusCode)
+        }
 
         // 扩展名优先取原始文件名，其次下载链接路径，兜底 srt
         let ext = (suggestedFileName as NSString?)?.pathExtension.lowercased()
@@ -234,12 +238,16 @@ enum OpenSubtitlesAccount {
         KeychainStore.set(value.isEmpty ? nil : value, key: "clearplay.opensubtitles.password")
     }
 
-    /// 构造客户端；有账号时顺带登录以获得下载额度
+    /// 构造客户端；有账号时顺带登录以获得下载额度（登录失败不阻断，仅搜索无需登录）
     static func makeClient() async throws -> OpenSubtitlesClient {
         guard !apiKey.isEmpty else { throw OpenSubtitlesClient.SubtitleError.missingAPIKey }
         var client = OpenSubtitlesClient(apiKey: apiKey)
         if !username.isEmpty, !password.isEmpty {
-            try? await client.login(username: username, password: password)
+            do {
+                try await client.login(username: username, password: password)
+            } catch {
+                debugLog("opensubtitles login failed: \(error.localizedDescription)")
+            }
         }
         return client
     }

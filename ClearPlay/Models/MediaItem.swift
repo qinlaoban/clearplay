@@ -30,8 +30,10 @@ final class MediaItem {
     /// 海报/背景图缓存文件名（位于 Caches/ClearPlay/Artwork）
     var posterFile: String?
     var backdropFile: String?
-    /// 上次尝试刮削的时间（nil 表示从未刮削，用于增量调度）
+    /// 上次尝试刮削的时间（nil 表示从未刮削或待重试）
     var scrapedAt: Date?
+    /// 刮削失败次数（连续失败达上限后标记放弃）
+    var scrapeAttempts: Int = 0
 
     // 播放状态
     var durationSeconds: Double = 0

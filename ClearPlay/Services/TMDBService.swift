@@ -100,7 +100,11 @@ struct TMDBService {
     /// 下载 TMDB 图片到本地缓存，返回缓存文件名
     func downloadImage(remotePath: String, cacheName: String, width: Int = 500) async throws -> String {
         let url = URL(string: "https://image.tmdb.org/t/p/w\(width)\(remotePath)")!
-        let (data, _) = try await session.data(from: url)
+        let (data, response) = try await session.data(from: url)
+        // 校验状态码：避免把 404 错误页写进海报缓存
+        if let http = response as? HTTPURLResponse, !(200..<300).contains(http.statusCode) {
+            throw ScrapeError.noMatch
+        }
         let ext = remotePath.hasSuffix(".png") ? "png" : "jpg"
         let fileURL = PosterStore.localURL(for: "\(cacheName).\(ext)")
         try data.write(to: fileURL, options: .atomic)
