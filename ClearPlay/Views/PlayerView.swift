@@ -12,6 +12,8 @@ struct PlayerView: View {
     @State private var hideTask: Task<Void, Never>?
     @State private var lastSaved: Double = 0
     @State private var showSubtitleSearch = false
+    @State private var pointerOverControls = false
+    @State private var isScrubbing = false
 
     private func savePosition(at seconds: Double? = nil) {
         let t = seconds ?? vm.currentTime
@@ -99,6 +101,20 @@ struct PlayerView: View {
                 )
                 .allowsHitTesting(false)
             )
+            #if os(macOS)
+            // 指针停在控制条上时不自动隐藏
+            .onContinuousHover { phase in
+                switch phase {
+                case .active:
+                    pointerOverControls = true
+                    hideTask?.cancel()
+                    controlsVisible = true
+                case .ended:
+                    pointerOverControls = false
+                    if vm.isPlaying { scheduleHide() }
+                }
+            }
+            #endif
         }
         .opacity(controlsVisible ? 1 : 0)
         .animation(.easeInOut(duration: 0.25), value: controlsVisible)
@@ -106,30 +122,45 @@ struct PlayerView: View {
 
     /// 进度条 + 时间标签
     private var scrubberRow: some View {
-        HStack(spacing: 12) {
-            Text(formatTime(vm.currentTime))
-                .monospacedDigit()
-                .foregroundStyle(.white.opacity(0.9))
-                .font(.caption)
-
-            Slider(
-                value: Binding(
-                    get: { vm.currentTime },
-                    set: { vm.scrubPreview(to: $0) }
-                ),
-                in: 0...max(vm.duration, 0.1)
-            ) { editing in
-                if !editing {
-                    vm.seek(to: vm.currentTime)
-                }
+        VStack(spacing: 8) {
+            // 拖拽时悬浮时间气泡（scrub 预览）
+            if isScrubbing {
+                Text(formatTime(vm.currentTime))
+                    .font(.cpCaption.monospacedDigit())
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 5)
+                    .background(Capsule().fill(.cpElevated))
+                    .foregroundStyle(.cpText)
+                    .transition(.opacity)
             }
-            .tint(.white)
 
-            Text(formatTime(vm.duration))
-                .monospacedDigit()
-                .foregroundStyle(.white.opacity(0.6))
-                .font(.caption)
+            HStack(spacing: 12) {
+                Text(formatTime(vm.currentTime))
+                    .monospacedDigit()
+                    .foregroundStyle(.white.opacity(0.9))
+                    .font(.cpCaption)
+
+                Slider(
+                    value: Binding(
+                        get: { vm.currentTime },
+                        set: { vm.scrubPreview(to: $0) }
+                    ),
+                    in: 0...max(vm.duration, 0.1)
+                ) { editing in
+                    isScrubbing = editing
+                    if !editing {
+                        vm.seek(to: vm.currentTime)
+                    }
+                }
+                .tint(.white)
+
+                Text(formatTime(vm.duration))
+                    .monospacedDigit()
+                    .foregroundStyle(.white.opacity(0.6))
+                    .font(.cpCaption)
+            }
         }
+        .animation(.easeInOut(duration: 0.15), value: isScrubbing)
     }
 
     /// 主控制按钮行
@@ -211,7 +242,7 @@ struct PlayerView: View {
         .buttonStyle(.plain)
         .foregroundStyle(.white)
         .labelStyle(.iconOnly)
-        .font(.system(size: 17, weight: .medium))
+        .font(.cpControl)
     }
 
     private var playPauseButton: some View {
@@ -220,7 +251,7 @@ struct PlayerView: View {
             revealControls()
         } label: {
             Image(systemName: vm.isPlaying ? "pause.fill" : "play.fill")
-                .font(.system(size: 24, weight: .semibold))
+                .font(.cpPlay)
         }
     }
 
@@ -293,7 +324,7 @@ struct PlayerView: View {
     private var volumeControl: some View {
         HStack(spacing: 6) {
             Image(systemName: volumeIcon)
-                .font(.system(size: 14))
+                .font(.cpSmall)
                 .foregroundStyle(.white)
             Slider(value: $vm.volume, in: 0...1)
                 .frame(width: 70)
@@ -319,11 +350,16 @@ struct PlayerView: View {
             return
         }
         controlsVisible = true
+        scheduleHide()
+    }
+
+    /// 排程 3 秒后自动隐藏；指针停在控制条上或已暂停时取消
+    private func scheduleHide() {
         hideTask?.cancel()
-        guard vm.isPlaying else { return }
+        guard vm.isPlaying, !pointerOverControls else { return }
         hideTask = Task {
             try? await Task.sleep(for: .seconds(3))
-            guard !Task.isCancelled else { return }
+            guard !Task.isCancelled, !pointerOverControls else { return }
             withAnimation(.easeInOut(duration: 0.25)) { controlsVisible = false }
         }
     }

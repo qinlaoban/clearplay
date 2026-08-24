@@ -31,9 +31,9 @@ struct HomeView: View {
                     }
 
                     if !recent.isEmpty {
-                        Text("最近添加")
-                            .font(.system(size: 20, weight: .semibold))
-                            .foregroundStyle(.cpText)
+                    Text("最近添加")
+                        .font(.cpHeading)
+                        .foregroundStyle(.cpText)
                         posterWall(recent)
                     }
                 }
@@ -54,11 +54,11 @@ struct HomeView: View {
                 .foregroundStyle(.cpTextSubtle)
 
             Text("媒体库是空的")
-                .font(.system(size: 20, weight: .semibold))
+                .font(.cpHeading)
                 .foregroundStyle(.cpText)
 
             Text("在侧栏点击「添加文件夹」，ClearPlay 会自动扫描影片并抓取海报")
-                .font(.system(size: 13))
+                .font(.cpBody)
                 .foregroundStyle(.cpTextSubtle)
                 .multilineTextAlignment(.center)
 

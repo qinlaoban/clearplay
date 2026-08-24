@@ -77,7 +77,7 @@ struct ContentView: View {
                     .tag(s)
             }
 
-            Section("来源") {
+            Section("导入") {
                 if media.isScanning {
                     Label("扫描中…", systemImage: "arrow.triangle.2.circlepath")
                         .foregroundStyle(.cpTextSubtle)
@@ -91,6 +91,11 @@ struct ContentView: View {
                     showFileImporter = true
                 } label: {
                     Label("导入视频文件…", systemImage: "plus")
+                }
+                Button {
+                    section = .settings
+                } label: {
+                    Label("WebDAV 服务器…", systemImage: "externaldrive.badge.plus")
                 }
             }
         }

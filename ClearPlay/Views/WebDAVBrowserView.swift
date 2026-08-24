@@ -33,7 +33,7 @@ struct WebDAVBrowserView: View {
                     .buttonStyle(.borderless)
                 }
                 Text(currentPath.isEmpty ? "/" : "/" + currentPath)
-                    .font(.system(size: 13, weight: .medium))
+                    .font(.cpBodyMed)
                     .foregroundStyle(.cpTextSubtle)
                     .lineLimit(1)
                     .truncationMode(.head)
@@ -110,13 +110,13 @@ struct WebDAVBrowserView: View {
                     .foregroundStyle(entry.isDirectory ? Color.cpPrimary : Color.cpTextSubtle)
                     .frame(width: 24)
                 Text(entry.name)
-                    .font(.system(size: 13, weight: .medium))
+                    .font(.cpBodyMed)
                     .foregroundStyle(.cpText)
                     .lineLimit(1)
                 Spacer()
                 if let size = entry.sizeBytes, !entry.isDirectory {
                     Text(ByteCountFormatter.string(fromByteCount: size, countStyle: .file))
-                        .font(.system(size: 11))
+                        .font(.cpCaption)
                         .foregroundStyle(.cpTextSubtle)
                 }
             }
@@ -199,7 +199,7 @@ struct WebDAVServerFormSheet: View {
                     if let testResult {
                         Label(testResult, systemImage: testResult.hasPrefix("连接成功") ? "checkmark.circle" : "xmark.circle")
                             .foregroundStyle(testResult.hasPrefix("连接成功") ? Color.green : Color.red)
-                            .font(.system(size: 12))
+                            .font(.cpSmall)
                     }
                 }
             }

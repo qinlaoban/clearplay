@@ -38,7 +38,7 @@ struct MediaDetailView: View {
 
                     if item.overview?.isEmpty == false || item.overview != nil {
                         Text(item.overview!)
-                            .font(.system(size: 13))
+                            .font(.cpBody)
                             .foregroundStyle(.cpTextSubtle)
                             .lineSpacing(4)
                     }
@@ -82,7 +82,7 @@ struct MediaDetailView: View {
 
             VStack(alignment: .leading, spacing: 8) {
                 Text(item.title)
-                    .font(.system(size: 28, weight: .bold))
+                    .font(.cpTitle)
                     .foregroundStyle(.cpText)
 
                 HStack(spacing: 8) {
@@ -101,12 +101,12 @@ struct MediaDetailView: View {
                         Text("剧集")
                     }
                 }
-                .font(.system(size: 12))
+                .font(.cpSmall)
                 .foregroundStyle(.cpTextSubtle)
 
                 if item.tmdbID == nil {
                     Label("未刮削元数据", systemImage: "sparkles")
-                        .font(.system(size: 11))
+                        .font(.cpCaption)
                         .foregroundStyle(.cpTextSubtle)
                 }
             }
@@ -124,8 +124,8 @@ struct MediaDetailView: View {
     private var actionRow: some View {
         HStack(spacing: 14) {
             Button(action: play) {
-                Label(item.inProgress ? "继续播放" : "播放", systemImage: "play.fill")
-                    .font(.system(size: 15, weight: .semibold))
+                    Label(item.inProgress ? "继续播放" : "播放", systemImage: "play.fill")
+                        .font(.cpButton)
                     .foregroundStyle(.black)
                     .padding(.horizontal, 22)
                     .padding(.vertical, 10)
@@ -138,7 +138,7 @@ struct MediaDetailView: View {
                 try? context.save()
             } label: {
                 Image(systemName: item.favorite ? "heart.fill" : "heart")
-                    .font(.system(size: 17))
+                    .font(.cpControl)
                     .foregroundStyle(item.favorite ? .red : .cpTextSubtle)
                     .frame(width: 40, height: 40)
                     .background(Circle().fill(.cpSurfaceHi))
@@ -151,7 +151,7 @@ struct MediaDetailView: View {
                 }
             } label: {
                 Image(systemName: "ellipsis")
-                    .font(.system(size: 17))
+                    .font(.cpControl)
                     .foregroundStyle(.cpTextSubtle)
                     .frame(width: 40, height: 40)
                     .background(Circle().fill(.cpSurfaceHi))
@@ -223,13 +223,13 @@ struct EpisodeRow: View {
 
             VStack(alignment: .leading, spacing: 4) {
                 Text("第 \(item.episodeNumber ?? 0) 集 · \(item.title)")
-                    .font(.system(size: 13, weight: .medium))
+                    .font(.cpBodyMed)
                     .foregroundStyle(.cpText)
                     .lineLimit(1)
 
                 if item.durationSeconds > 0 {
                     Text(Format.duration(item.durationSeconds))
-                        .font(.system(size: 11).monospacedDigit())
+                        .font(.cpCaption.monospacedDigit())
                         .foregroundStyle(.cpTextSubtle)
                 }
             }

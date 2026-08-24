@@ -23,20 +23,20 @@ struct SettingsView: View {
                 TextField("API Key（themoviedb.org 申请）", text: $tmdbApiKey)
                     .textFieldStyle(.roundedBorder)
                 Text("填写后新扫描的影片会自动匹配海报与简介。可在 https://www.themoviedb.org/settings/api 免费申请。")
-                    .font(.system(size: 11))
+                    .font(.cpCaption)
                     .foregroundStyle(.cpTextSubtle)
             }
 
-            Section("WebDAV") {
+            Section("WebDAV 导入") {
                 ForEach(servers) { server in
                     HStack {
                         Image(systemName: "cloud.fill")
                             .foregroundStyle(.cpPrimary)
                         VStack(alignment: .leading, spacing: 2) {
                             Text(server.name)
-                                .font(.system(size: 13, weight: .medium))
+                                .font(.cpBodyMed)
                             Text(server.baseURL)
-                                .font(.system(size: 11))
+                                .font(.cpCaption)
                                 .foregroundStyle(.cpTextSubtle)
                                 .lineLimit(1)
                         }
@@ -61,21 +61,21 @@ struct SettingsView: View {
                 }
                 if media.isScanning {
                     Label("正在扫描远程目录…", systemImage: "arrow.triangle.2.circlepath")
-                        .font(.system(size: 12))
+                        .font(.cpSmall)
                         .foregroundStyle(.cpTextSubtle)
                 }
             }
 
-            Section("资料库文件夹") {
+            Section("本地文件夹") {
                 ForEach(folders) { folder in
                     HStack {
                         Image(systemName: "folder.fill")
                             .foregroundStyle(.cpPrimary)
                         VStack(alignment: .leading, spacing: 2) {
                             Text(folder.name)
-                                .font(.system(size: 13, weight: .medium))
+                                .font(.cpBodyMed)
                             Text(folder.path)
-                                .font(.system(size: 11))
+                                .font(.cpCaption)
                                 .foregroundStyle(.cpTextSubtle)
                                 .lineLimit(1)
                         }
@@ -108,7 +108,7 @@ struct SettingsView: View {
                     .textFieldStyle(.roundedBorder)
                     .onSubmit(saveAccount)
                 Text("在 https://www.opensubtitles.com 免费申请 API Key。填写用户名密码后才能下载字幕文件；仅搜索无需登录。")
-                    .font(.system(size: 11))
+                    .font(.cpCaption)
                     .foregroundStyle(.cpTextSubtle)
             }
 

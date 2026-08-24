@@ -8,7 +8,7 @@ struct ContinueWatchingRow: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("继续观看")
-                .font(.system(size: 20, weight: .semibold))
+                .font(.cpHeading)
                 .foregroundStyle(.cpText)
 
             ScrollView(.horizontal, showsIndicators: false) {
@@ -47,7 +47,9 @@ struct ContinueWatchingRow: View {
                 // 角标放右上角，避免与播放钮重叠
                 if let remaining = remainingLabel(for: item) {
                     Text(remaining)
-                        .font(.system(size: 11, weight: .medium).monospacedDigit())
+                        .font(.cpCaption)
+                        .fontWeight(.medium)
+                        .monospacedDigit()
                         .padding(.horizontal, 7)
                         .padding(.vertical, 3)
                         .background(Capsule().fill(.black.opacity(0.7)))
@@ -57,7 +59,7 @@ struct ContinueWatchingRow: View {
             }
 
             Text(item.displayTitle)
-                .font(.system(size: 13, weight: .medium))
+                .font(.cpBodyMed)
                 .foregroundStyle(.cpText)
                 .lineLimit(1)
         }

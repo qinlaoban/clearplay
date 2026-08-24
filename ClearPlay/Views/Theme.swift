@@ -57,6 +57,11 @@ extension Font {
     static let cpBodyMed = Font.system(size: 13, weight: .medium)
     static let cpSmall = Font.system(size: 12, weight: .regular)
     static let cpCaption = Font.system(size: 11, weight: .regular)
+
+    // 播放器 / 按钮专用
+    static let cpControl = Font.system(size: 17, weight: .medium)
+    static let cpPlay = Font.system(size: 24, weight: .semibold)
+    static let cpButton = Font.system(size: 15, weight: .semibold)
 }
 
 /// 圆角 / 间距设计常量

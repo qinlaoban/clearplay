@@ -14,12 +14,12 @@ struct PosterCard: View {
             poster
 
             Text(item.displayTitle)
-                .font(.system(size: 13, weight: .medium))
+                .font(.cpBodyMed)
                 .foregroundStyle(.cpText)
                 .lineLimit(1)
 
             subtitle
-                .font(.system(size: 11))
+                .font(.cpCaption)
                 .foregroundStyle(.cpTextSubtle)
         }
         .frame(width: width, alignment: .leading)
@@ -50,7 +50,7 @@ struct PosterCard: View {
             if item.inProgress {
                 GeometryReader { geo in
                     Capsule()
-                        .fill(.white.opacity(0.25))
+                        .fill(.black.opacity(0.45))
                         .frame(height: 3)
                         .overlay(alignment: .leading) {
                             Capsule()
