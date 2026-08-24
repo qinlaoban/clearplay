@@ -11,18 +11,7 @@ struct ClearPlayApp: App {
 
     init() {
         debugLog("app launched")
-        let schema = Schema([MediaItem.self, LibraryFolder.self, WebDAVServer.self])
-        let config = ModelConfiguration("ClearPlay", schema: schema)
-        do {
-            container = try ModelContainer(for: schema, configurations: config)
-        } catch {
-            debugLog("ModelContainer init failed: \(error), fallback in-memory")
-            // 兜底：内存模式保证 App 可用
-            container = try! ModelContainer(
-                for: MediaItem.self, LibraryFolder.self, WebDAVServer.self,
-                configurations: ModelConfiguration(isStoredInMemoryOnly: true)
-            )
-        }
+        container = AppDatabase.shared
         _mediaLib = State(initialValue: MediaLibraryViewModel(container: container))
     }
 
@@ -36,16 +25,7 @@ struct ClearPlayApp: App {
                 .task {
                     // 导入散装文件后自动开始播放（队列按类型分组）
                     mediaLib.onFilesImported = { item in
-                        let ctx = container.mainContext
-                        let all = (try? ctx.fetch(FetchDescriptor<MediaItem>())) ?? []
-                        let queue: [MediaItem]
-                        if item.kind == .episode, let series = item.seriesName {
-                            queue = all
-                                .filter { $0.kind == .episode && $0.seriesName == series }
-                                .sorted { ($0.season ?? 0, $0.episodeNumber ?? 0) < ($1.season ?? 0, $1.episodeNumber ?? 0) }
-                        } else {
-                            queue = all.filter { $0.kind == .movie }.sorted { $0.displayTitle < $1.displayTitle }
-                        }
+                        let queue = MediaQueue.build(start: item, context: container.mainContext)
                         library.play(queue: queue.isEmpty ? [item] : queue, start: item)
                     }
 

@@ -1,6 +1,7 @@
 import SwiftUI
 import SwiftData
 import UniformTypeIdentifiers
+import CoreSpotlight
 
 /// 侧栏导航分区
 enum SidebarSection: String, CaseIterable, Hashable {
@@ -38,6 +39,17 @@ struct ContentView: View {
         }
         .cpTheme()
         .background(.cpBackground)
+        // App Intents / Spotlight 触发的播放请求
+        .onReceive(NotificationCenter.default.publisher(for: .clearplayPlayRequested)) { _ in
+            consumePendingPlay()
+        }
+        .task { consumePendingPlay() } // 兜底：冷启动时 intent 已先于 UI 写入
+        // Spotlight 点击结果回跳
+        .onContinueUserActivity(CSSearchableItemActionType) { activity in
+            if let path = activity.userInfo?[CSSearchableItemActivityIdentifier] as? String {
+                play(path: path)
+            }
+        }
         .fileImporter(
             isPresented: $showFolderImporter,
             allowedContentTypes: [.folder],
@@ -66,6 +78,25 @@ struct ContentView: View {
                     .zIndex(10)
             }
         }
+    }
+
+    // MARK: - 外部播放请求
+
+    @Environment(\.modelContext) private var modelContext
+
+    /// 消费 PendingPlay 中待播条目
+    private func consumePendingPlay() {
+        guard let path = PendingPlay.path else { return }
+        PendingPlay.path = nil
+        play(path: path)
+    }
+
+    private func play(path: String) {
+        guard let item = MediaQueue.find(path: path, context: modelContext) else {
+            media.lastError = "找不到影片，可能已被移出资料库"
+            return
+        }
+        library.play(queue: MediaQueue.build(start: item, context: modelContext), start: item)
     }
 
     // MARK: - 侧栏

@@ -91,6 +91,7 @@ final class MediaLibraryViewModel {
         }
         context.delete(folder)
         try? context.save()
+        reindexSpotlight()
     }
 
     private func existsFolder(path: String, context: ModelContext) -> Bool {
@@ -101,10 +102,17 @@ final class MediaLibraryViewModel {
 
     // MARK: - 扫描
 
-    /// 全量扫描所有目录（增量入库新文件、清理失效记录），随后触发刮削
+    /// 全量扫描所有目录（增量入库新文件、清理失效记录），随后触发刮削与 Spotlight 索引重建
     func scanAndScrape() async {
         await scanAll()
         await scrapePending()
+        reindexSpotlight()
+    }
+
+    /// 重建 Spotlight 索引（全量）
+    func reindexSpotlight() {
+        let items = (try? container.mainContext.fetch(FetchDescriptor<MediaItem>())) ?? []
+        SpotlightIndexer.reindexAll(items)
     }
 
     private func scanAll() async {
@@ -212,6 +220,7 @@ final class MediaLibraryViewModel {
         context.delete(server)
         try? context.save()
         refreshAuthStore(context: context)
+        reindexSpotlight()
     }
 
     private func fetchServer(baseURL: String, context: ModelContext) -> WebDAVServer? {
@@ -273,6 +282,7 @@ final class MediaLibraryViewModel {
                 lastError = "该目录下没有找到视频文件"
             } else {
                 await scrapePending()
+                reindexSpotlight()
             }
         } catch {
             lastError = "WebDAV 扫描失败：\(error.localizedDescription)"

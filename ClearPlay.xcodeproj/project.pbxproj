@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		027DE99AA59E3D9D053A8D70 /* Format.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E0190DA172964B74D505CCC /* Format.swift */; };
+		04BEE7C06AB9B96E5E81108F /* AppDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AB1E96362AF8F934F947138 /* AppDatabase.swift */; };
 		05351E2B44E56B0E44648DA1 /* LibraryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A120C0752E47168641FBC42 /* LibraryViewModel.swift */; };
 		079ADC9915F392CD980D4318 /* WebDAVBrowserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DBD1C047018353940AD781D /* WebDAVBrowserView.swift */; };
 		0916CB921A71191899E40383 /* FolderScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96F92C781DA6BFD2ED0EE657 /* FolderScanner.swift */; };
@@ -20,6 +21,7 @@
 		21D8EBB71F1C816A31A0FC97 /* PosterStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09F488490CDAA2064CDA371B /* PosterStore.swift */; };
 		24C7099A54F3A1263B6DBF12 /* WebDAVClientTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AC435869E5E606C514230DA /* WebDAVClientTests.swift */; };
 		2B289C15CB8DB0FA00659834 /* AetherEngine in Frameworks */ = {isa = PBXBuildFile; productRef = EB92A9AEB8E3F3BCA3585E48 /* AetherEngine */; };
+		372F10672ACD8C4BB7D2845E /* AppDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AB1E96362AF8F934F947138 /* AppDatabase.swift */; };
 		3C17B39AD6386891DCEE58A1 /* PosterCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 953D168C15E9447556DABCF9 /* PosterCard.swift */; };
 		3CBC288CD1499D9A383079F3 /* SubtitleSearchSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA2534DD96A10E264F12A8BB /* SubtitleSearchSheet.swift */; };
 		3DF070301974217D6CB33D73 /* PlayerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3A7B91EA56F6CB0B012F3A0 /* PlayerViewModel.swift */; };
@@ -31,10 +33,12 @@
 		501DCF11827B0F851807F8DB /* MediaDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADE3CEA3FEDCB4ED890B8B0E /* MediaDetailView.swift */; };
 		50C1EBD950E3C057B111BEDB /* Log.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6639BC6A6667D6275C4A349 /* Log.swift */; };
 		51A4C882E31BB8A468BDB713 /* PosterCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 953D168C15E9447556DABCF9 /* PosterCard.swift */; };
+		542479CB86EDF7C29DCBB73E /* SpotlightIndexer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D10157C3EC41D8ABCC7FDC23 /* SpotlightIndexer.swift */; };
 		5C3AFF27DFE3C6CA126E76CF /* LibraryViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04B035A52DDF8C9621326315 /* LibraryViewModelTests.swift */; };
 		625A902BC3CBF529AB043346 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3222C06250928130D5D0CC70 /* SettingsView.swift */; };
 		63D1D1FBA2719BDB44C69D71 /* Log.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6639BC6A6667D6275C4A349 /* Log.swift */; };
 		6FE6E3F3532CD5D95DA82ED6 /* PlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4B8BD61B4249C945546B516 /* PlayerView.swift */; };
+		70E4781CA338D17F405101A6 /* MediaIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = D54A19DD717FAA9F3B0E267D /* MediaIntents.swift */; };
 		7263DC09ED64FEBEE554BDCE /* TMDBService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49A8134B4815E2D8DAC4A55B /* TMDBService.swift */; };
 		74BB38C1403B7EC63340986D /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0D1816524F5B1822176B1A1 /* Theme.swift */; };
 		79808AB9099E37B85FA70A46 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0D1816524F5B1822176B1A1 /* Theme.swift */; };
@@ -46,6 +50,7 @@
 		8A715C842AFF5714B0D46A30 /* PosterStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09F488490CDAA2064CDA371B /* PosterStore.swift */; };
 		8DDFA1F8232E8FD1D9FE85BA /* TMDBServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61A5EB558BDBF9F0A76122C6 /* TMDBServiceTests.swift */; };
 		9085BE8D5A0F11DA438B35F0 /* PlayerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3A7B91EA56F6CB0B012F3A0 /* PlayerViewModel.swift */; };
+		9256DCEF193AF06E3064AD19 /* MediaIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = D54A19DD717FAA9F3B0E267D /* MediaIntents.swift */; };
 		97D772E4F6023B1FE9E82A7A /* MediaItemTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AEE10DE3DA68EEF1218ACAB /* MediaItemTests.swift */; };
 		9854E307AEB5E9C90EFD755A /* MediaLibraryViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 323D04C68F2F6939F9A08D31 /* MediaLibraryViewModelTests.swift */; };
 		99F5E4F2536EB3E3D2D51F09 /* LibraryFolder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AD9E3AC86B5AF9AA830D6CE /* LibraryFolder.swift */; };
@@ -58,7 +63,9 @@
 		A62617FE1D7AD5C95A277580 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB7A15CA8B782A0990A9CBCE /* HomeView.swift */; };
 		A83E4D0AE7738D487244D88A /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3222C06250928130D5D0CC70 /* SettingsView.swift */; };
 		ABFF451658C3082D57924847 /* ShimmerModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A5D3F7830C5B3FC0952B199 /* ShimmerModifier.swift */; };
+		AF5E7D9A2C5426C2EEA1803F /* SpotlightIndexer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D10157C3EC41D8ABCC7FDC23 /* SpotlightIndexer.swift */; };
 		B1C38F6DE158D37D1F9D6C9F /* MediaGridView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E0EC39366947F67B0DFDC04 /* MediaGridView.swift */; };
+		B474B614024129EB43D36367 /* MediaQueueTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F614A332F41E6800D3848D70 /* MediaQueueTests.swift */; };
 		B980AC1C71AA07FE520F977E /* VideoItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = B92CB17C4B70D89BDD117045 /* VideoItem.swift */; };
 		C1CE44C706BED600E94AEC03 /* KeychainStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 679D5A475C6C5ED8EB998C89 /* KeychainStore.swift */; };
 		C20C6CEB944695111A8A10FD /* ClearPlayApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = E53CF515169CD5FF095E2D0D /* ClearPlayApp.swift */; };
@@ -115,6 +122,7 @@
 		9611CEDBCD74E43EBCFF4CA1 /* FilenameParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilenameParser.swift; sourceTree = "<group>"; };
 		96F92C781DA6BFD2ED0EE657 /* FolderScanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolderScanner.swift; sourceTree = "<group>"; };
 		99D418AE0AB364FD0B88AC7F /* MediaItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaItem.swift; sourceTree = "<group>"; };
+		9AB1E96362AF8F934F947138 /* AppDatabase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDatabase.swift; sourceTree = "<group>"; };
 		9AEE10DE3DA68EEF1218ACAB /* MediaItemTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaItemTests.swift; sourceTree = "<group>"; };
 		ADE3CEA3FEDCB4ED890B8B0E /* MediaDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaDetailView.swift; sourceTree = "<group>"; };
 		B77274D23E7594EFC0851F2F /* MediaLibraryViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaLibraryViewModel.swift; sourceTree = "<group>"; };
@@ -124,13 +132,16 @@
 		BFE55C4C8F3F4BED35614ECF /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		CA2534DD96A10E264F12A8BB /* SubtitleSearchSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubtitleSearchSheet.swift; sourceTree = "<group>"; };
 		D0D1816524F5B1822176B1A1 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
+		D10157C3EC41D8ABCC7FDC23 /* SpotlightIndexer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpotlightIndexer.swift; sourceTree = "<group>"; };
 		D4B8BD61B4249C945546B516 /* PlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerView.swift; sourceTree = "<group>"; };
+		D54A19DD717FAA9F3B0E267D /* MediaIntents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaIntents.swift; sourceTree = "<group>"; };
 		D6639BC6A6667D6275C4A349 /* Log.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Log.swift; sourceTree = "<group>"; };
 		E36EE3258F9801919B4192BF /* ContinueWatchingRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContinueWatchingRow.swift; sourceTree = "<group>"; };
 		E3A7B91EA56F6CB0B012F3A0 /* PlayerViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerViewModel.swift; sourceTree = "<group>"; };
 		E53CF515169CD5FF095E2D0D /* ClearPlayApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClearPlayApp.swift; sourceTree = "<group>"; };
 		E92CDBD539C0C6B1F4918EA5 /* WebDAVClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebDAVClient.swift; sourceTree = "<group>"; };
 		EF58DCD6A2BE6EC8BCB0F00D /* ArtworkImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArtworkImage.swift; sourceTree = "<group>"; };
+		F614A332F41E6800D3848D70 /* MediaQueueTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaQueueTests.swift; sourceTree = "<group>"; };
 		FFCF10A35BF636D4B71B8829 /* WebDAVServer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebDAVServer.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -180,6 +191,14 @@
 				1DBD1C047018353940AD781D /* WebDAVBrowserView.swift */,
 			);
 			path = Views;
+			sourceTree = "<group>";
+		};
+		31DE0C93D01FFAE33D6E7BC2 /* Intents */ = {
+			isa = PBXGroup;
+			children = (
+				D54A19DD717FAA9F3B0E267D /* MediaIntents.swift */,
+			);
+			path = Intents;
 			sourceTree = "<group>";
 		};
 		32C27C802F288278999AAD21 /* App */ = {
@@ -233,6 +252,7 @@
 			isa = PBXGroup;
 			children = (
 				32C27C802F288278999AAD21 /* App */,
+				31DE0C93D01FFAE33D6E7BC2 /* Intents */,
 				FD70C2722B76996FAC91F0E9 /* Models */,
 				B22BAEACEB31C8B7FAFFD520 /* Services */,
 				79829856DA8B70954F40EA49 /* Utils */,
@@ -250,6 +270,7 @@
 				04B035A52DDF8C9621326315 /* LibraryViewModelTests.swift */,
 				9AEE10DE3DA68EEF1218ACAB /* MediaItemTests.swift */,
 				323D04C68F2F6939F9A08D31 /* MediaLibraryViewModelTests.swift */,
+				F614A332F41E6800D3848D70 /* MediaQueueTests.swift */,
 				16F287A8D832542041FA9256 /* SubtitleServiceTests.swift */,
 				61A5EB558BDBF9F0A76122C6 /* TMDBServiceTests.swift */,
 				5AC435869E5E606C514230DA /* WebDAVClientTests.swift */,
@@ -260,9 +281,11 @@
 		B22BAEACEB31C8B7FAFFD520 /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				9AB1E96362AF8F934F947138 /* AppDatabase.swift */,
 				9611CEDBCD74E43EBCFF4CA1 /* FilenameParser.swift */,
 				96F92C781DA6BFD2ED0EE657 /* FolderScanner.swift */,
 				09F488490CDAA2064CDA371B /* PosterStore.swift */,
+				D10157C3EC41D8ABCC7FDC23 /* SpotlightIndexer.swift */,
 				4306E3456DC34F1953B20ED6 /* SubtitleService.swift */,
 				49A8134B4815E2D8DAC4A55B /* TMDBService.swift */,
 				E92CDBD539C0C6B1F4918EA5 /* WebDAVClient.swift */,
@@ -387,6 +410,7 @@
 				5C3AFF27DFE3C6CA126E76CF /* LibraryViewModelTests.swift in Sources */,
 				97D772E4F6023B1FE9E82A7A /* MediaItemTests.swift in Sources */,
 				9854E307AEB5E9C90EFD755A /* MediaLibraryViewModelTests.swift in Sources */,
+				B474B614024129EB43D36367 /* MediaQueueTests.swift in Sources */,
 				863B03D0661A431ADCEA02EA /* SubtitleServiceTests.swift in Sources */,
 				8DDFA1F8232E8FD1D9FE85BA /* TMDBServiceTests.swift in Sources */,
 				24C7099A54F3A1263B6DBF12 /* WebDAVClientTests.swift in Sources */,
@@ -397,6 +421,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				372F10672ACD8C4BB7D2845E /* AppDatabase.swift in Sources */,
 				E567E5BB05D58C3321613AA3 /* ArtworkImage.swift in Sources */,
 				13C45918E7CBD0DD2982CC1B /* ClearPlayApp.swift in Sources */,
 				43DF68382882966461A76E9B /* ContentView.swift in Sources */,
@@ -411,6 +436,7 @@
 				50C1EBD950E3C057B111BEDB /* Log.swift in Sources */,
 				E565B1C2A46FF65CE1373FAE /* MediaDetailView.swift in Sources */,
 				B1C38F6DE158D37D1F9D6C9F /* MediaGridView.swift in Sources */,
+				70E4781CA338D17F405101A6 /* MediaIntents.swift in Sources */,
 				87309A4F921B2F6ED8CD9AB9 /* MediaItem.swift in Sources */,
 				A5E0C7E18BA401C4D87A8DB7 /* MediaLibraryViewModel.swift in Sources */,
 				EE5DA3DCE439622989707AFC /* PlayerView.swift in Sources */,
@@ -419,6 +445,7 @@
 				21D8EBB71F1C816A31A0FC97 /* PosterStore.swift in Sources */,
 				A83E4D0AE7738D487244D88A /* SettingsView.swift in Sources */,
 				EAB2E707812AD2474B45FBE5 /* ShimmerModifier.swift in Sources */,
+				AF5E7D9A2C5426C2EEA1803F /* SpotlightIndexer.swift in Sources */,
 				E737AF022796762E5DA9723A /* SubtitleSearchSheet.swift in Sources */,
 				155D1CA0CC3DBAF65D71E3BC /* SubtitleService.swift in Sources */,
 				7263DC09ED64FEBEE554BDCE /* TMDBService.swift in Sources */,
@@ -434,6 +461,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				04BEE7C06AB9B96E5E81108F /* AppDatabase.swift in Sources */,
 				9EA20598207A43463B5757C3 /* ArtworkImage.swift in Sources */,
 				C20C6CEB944695111A8A10FD /* ClearPlayApp.swift in Sources */,
 				2126D8810E92B29013417FBD /* ContentView.swift in Sources */,
@@ -448,6 +476,7 @@
 				63D1D1FBA2719BDB44C69D71 /* Log.swift in Sources */,
 				501DCF11827B0F851807F8DB /* MediaDetailView.swift in Sources */,
 				E49F8248F8CA01D6972D33F4 /* MediaGridView.swift in Sources */,
+				9256DCEF193AF06E3064AD19 /* MediaIntents.swift in Sources */,
 				7DB6D8FF986A4715FAADD5E4 /* MediaItem.swift in Sources */,
 				88D53933B582FD33B82004C9 /* MediaLibraryViewModel.swift in Sources */,
 				6FE6E3F3532CD5D95DA82ED6 /* PlayerView.swift in Sources */,
@@ -456,6 +485,7 @@
 				8A715C842AFF5714B0D46A30 /* PosterStore.swift in Sources */,
 				625A902BC3CBF529AB043346 /* SettingsView.swift in Sources */,
 				ABFF451658C3082D57924847 /* ShimmerModifier.swift in Sources */,
+				542479CB86EDF7C29DCBB73E /* SpotlightIndexer.swift in Sources */,
 				3CBC288CD1499D9A383079F3 /* SubtitleSearchSheet.swift in Sources */,
 				E8C7ADA436F831DEF157CDB8 /* SubtitleService.swift in Sources */,
 				425B89F47F3B24EDC1237E1E /* TMDBService.swift in Sources */,

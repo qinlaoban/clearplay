@@ -66,7 +66,9 @@ struct MediaGridView: View {
     }
 
     var body: some View {
-        Group {
+        // body 内多处访问，先求值一次避免重复过滤+排序
+        let items = self.items
+        return Group {
             if items.isEmpty {
                 ContentUnavailableView {
                     Label(
