@@ -14,6 +14,12 @@ struct PlayerView: View {
     @State private var showSubtitleSearch = false
     @State private var pointerOverControls = false
     @State private var isScrubbing = false
+    @State private var previewImage: CGImage?
+    @State private var previewTask: Task<Void, Never>?
+    // 连播（Up Next）
+    @State private var upNextItem: VideoItem?
+    @State private var upNextCountdown = 8
+    @State private var countdownTask: Task<Void, Never>?
 
     private func savePosition(at seconds: Double? = nil) {
         let t = seconds ?? vm.currentTime
@@ -46,6 +52,11 @@ struct PlayerView: View {
             }
 
             controlOverlay
+
+            // 连播浮层：当前集播完后倒计时自动播放下一集
+            if let next = upNextItem {
+                upNextOverlay(next)
+            }
         }
         #if os(macOS)
         .navigationTitle(item.name)
@@ -64,12 +75,31 @@ struct PlayerView: View {
         }
         .onDisappear {
             hideTask?.cancel()
+            countdownTask?.cancel()
+            previewTask?.cancel()
             savePosition()
         }
-        // 每 5 秒或发生回退时落盘一次播放位置
+        // 每 5 秒或发生回退时落盘一次播放位置；拖拽进度条时刷新缩略图预览
         .onChange(of: vm.currentTime) { _, newTime in
             if newTime - lastSaved > 5 || newTime < lastSaved - 0.5 {
                 savePosition(at: newTime)
+            }
+            if isScrubbing { schedulePreview() }
+        }
+        // 播放自然结束：标记看完 + 弹出连播提示
+        .onChange(of: vm.hasEnded) { _, ended in
+            guard ended else { return }
+            savePosition(at: vm.duration)
+            if let next = library.step(from: item, offset: 1) {
+                startUpNextCountdown(next)
+            }
+        }
+        .onChange(of: isScrubbing) { _, scrubbing in
+            if scrubbing {
+                schedulePreview()
+            } else {
+                previewTask?.cancel()
+                previewImage = nil
             }
         }
         .sheet(isPresented: $showSubtitleSearch) {
@@ -123,15 +153,25 @@ struct PlayerView: View {
     /// 进度条 + 时间标签
     private var scrubberRow: some View {
         VStack(spacing: 8) {
-            // 拖拽时悬浮时间气泡（scrub 预览）
+            // 拖拽时悬浮预览：缩略图 + 时间气泡
             if isScrubbing {
-                Text(formatTime(vm.currentTime))
-                    .font(.cpCaption.monospacedDigit())
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 5)
-                    .background(Capsule().fill(.cpElevated))
-                    .foregroundStyle(.cpText)
-                    .transition(.opacity)
+                VStack(spacing: 6) {
+                    if let img = previewImage {
+                        Image(img, scale: 1, label: Text("预览"))
+                            .resizable()
+                            .scaledToFit()
+                            .frame(maxWidth: 240, maxHeight: 135)
+                            .clipShape(RoundedRectangle(cornerRadius: 8))
+                            .shadow(radius: 8)
+                    }
+                    Text(formatTime(vm.currentTime))
+                        .font(.cpCaption.monospacedDigit())
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 5)
+                        .background(Capsule().fill(.cpElevated))
+                        .foregroundStyle(.cpText)
+                }
+                .transition(.opacity)
             }
 
             HStack(spacing: 12) {
@@ -338,6 +378,95 @@ struct PlayerView: View {
         case ..<0.5: "speaker.wave.1.fill"
         default: "speaker.wave.2.fill"
         }
+    }
+
+    // MARK: - 缩略图进度预览
+
+    /// 拖拽中防抖拉取目标位置缩略图
+    private func schedulePreview() {
+        previewTask?.cancel()
+        let target = vm.currentTime
+        previewTask = Task {
+            try? await Task.sleep(for: .milliseconds(120))
+            guard !Task.isCancelled else { return }
+            let img = await vm.thumbnail(at: target)
+            guard !Task.isCancelled else { return }
+            withAnimation(.easeInOut(duration: 0.15)) { previewImage = img }
+        }
+    }
+
+    // MARK: - 连播（Up Next）
+
+    private func startUpNextCountdown(_ next: VideoItem) {
+        upNextItem = next
+        upNextCountdown = 8
+        countdownTask?.cancel()
+        countdownTask = Task {
+            while upNextCountdown > 0 {
+                try? await Task.sleep(for: .seconds(1))
+                guard !Task.isCancelled else { return }
+                upNextCountdown -= 1
+            }
+            play(next)
+        }
+    }
+
+    private func cancelUpNext() {
+        countdownTask?.cancel()
+        upNextItem = nil
+    }
+
+    private func play(_ next: VideoItem) {
+        countdownTask?.cancel()
+        upNextItem = nil
+        // 切换 current 触发 PlayerView 重建并加载新条目
+        library.current = next
+    }
+
+    /// 连播浮层（右上角，不遮挡底部控制条）
+    private func upNextOverlay(_ next: VideoItem) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Label("接下来播放", systemImage: "play.rectangle.on.rectangle")
+                .font(.cpCaption)
+                .foregroundStyle(.white.opacity(0.7))
+
+            Text(next.name)
+                .font(.cpBodyMed)
+                .foregroundStyle(.white)
+                .lineLimit(2)
+
+            HStack(spacing: 10) {
+                Button {
+                    play(next)
+                } label: {
+                    Text("立即播放 (\(upNextCountdown))")
+                        .font(.cpSmall)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .background(Capsule().fill(.white.opacity(0.9)))
+                        .foregroundStyle(.black)
+                }
+
+                Button(action: cancelUpNext) {
+                    Text("取消")
+                        .font(.cpSmall)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .background(Capsule().stroke(.white.opacity(0.5)))
+                        .foregroundStyle(.white)
+                }
+            }
+        }
+        .padding(16)
+        .frame(width: 260)
+        .background(RoundedRectangle(cornerRadius: CPMetrics.radius).fill(.black.opacity(0.85)))
+        .overlay(
+            RoundedRectangle(cornerRadius: CPMetrics.radius)
+                .stroke(.white.opacity(0.15))
+        )
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+        .padding(24)
+        .transition(.opacity.combined(with: .move(edge: .top)))
     }
 
     // MARK: - 控制条显隐逻辑

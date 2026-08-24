@@ -21,6 +21,8 @@ final class PlayerViewModel {
         didSet { engine?.volume = Float(volume) }
     }
     private(set) var rate: Float = 1.0
+    /// 播放自然结束（用于连播判定）
+    private(set) var hasEnded = false
 
     // 轨道
     private(set) var audioTracks: [TrackInfo] = []
@@ -33,6 +35,8 @@ final class PlayerViewModel {
 
     private var cancellables = Set<AnyCancellable>()
     private var loadedURL: URL?
+    /// 进度条缩略图预览解码器（跟随当前加载源）
+    private var extractor: FrameExtractor?
 
     /// 加载新的视频源（引擎复用，支持断点续播）
     func load(url: URL, startPosition: Double? = nil) {
@@ -57,6 +61,12 @@ final class PlayerViewModel {
 
     private func performLoad(url: URL, startPosition: Double?, engine: AetherEngine) async {
         isLoading = true
+        hasEnded = false
+        // 换源后旧解码器失效，立即释放
+        if let old = extractor {
+            extractor = nil
+            Task { await old.shutdown() }
+        }
         do {
             var options = LoadOptions()
             let isRemote = url.scheme == "http" || url.scheme == "https"
@@ -106,6 +116,14 @@ final class PlayerViewModel {
     /// 当前播放文件信息（供在线字幕搜索用）
     var currentVideoURL: URL? { loadedURL }
 
+    /// 进度条缩略图预览（关键帧低清解码，失败返回 nil 由 UI 退化为纯时间气泡）
+    func thumbnail(at seconds: Double) async -> CGImage? {
+        guard let engine else { return nil }
+        if extractor == nil { extractor = engine.makeFrameExtractor() }
+        let target = max(0, min(seconds, duration > 0 ? duration : seconds))
+        return await extractor?.thumbnail(at: target, maxWidth: 280)
+    }
+
     /// 远程 URL 命中的 WebDAV 客户端（取字幕目录列表用）；非远程或未配置返回 nil
     private func remoteClient(for url: URL) -> WebDAVClient? {
         guard url.scheme == "http" || url.scheme == "https" else { return nil }
@@ -130,6 +148,7 @@ final class PlayerViewModel {
                 case .playing:
                     isLoading = false
                     isPlaying = true
+                    hasEnded = false
                 case .paused, .seeking:
                     isLoading = false
                     isPlaying = false
@@ -140,6 +159,7 @@ final class PlayerViewModel {
                 case .idle, .ended:
                     isLoading = false
                     isPlaying = false
+                    if state == .ended { hasEnded = true }
                 }
             }
             .store(in: &cancellables)
