@@ -14,6 +14,7 @@
 		0916CB921A71191899E40383 /* FolderScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96F92C781DA6BFD2ED0EE657 /* FolderScanner.swift */; };
 		0A65D3146335472BAB11AAE6 /* FolderScannerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94840435DCFEDB87689C5776 /* FolderScannerTests.swift */; };
 		0A9A84E6E48AFFC32F3F0031 /* KeychainStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 679D5A475C6C5ED8EB998C89 /* KeychainStore.swift */; };
+		0B8AC1A2A76B15E8824A427F /* CloudSyncService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BD3599F0B21C7E5237BC7BE /* CloudSyncService.swift */; };
 		13C45918E7CBD0DD2982CC1B /* ClearPlayApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = E53CF515169CD5FF095E2D0D /* ClearPlayApp.swift */; };
 		1539EB2020EA802642368359 /* ContinueWatchingRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = E36EE3258F9801919B4192BF /* ContinueWatchingRow.swift */; };
 		155D1CA0CC3DBAF65D71E3BC /* SubtitleService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4306E3456DC34F1953B20ED6 /* SubtitleService.swift */; };
@@ -34,6 +35,8 @@
 		50C1EBD950E3C057B111BEDB /* Log.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6639BC6A6667D6275C4A349 /* Log.swift */; };
 		51A4C882E31BB8A468BDB713 /* PosterCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 953D168C15E9447556DABCF9 /* PosterCard.swift */; };
 		542479CB86EDF7C29DCBB73E /* SpotlightIndexer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D10157C3EC41D8ABCC7FDC23 /* SpotlightIndexer.swift */; };
+		5B218849630C7C01FBF25B71 /* CloudSyncServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 325D664144C99478B8838BE8 /* CloudSyncServiceTests.swift */; };
+		5B5A498BD8538825DEF9DF46 /* CloudSyncService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BD3599F0B21C7E5237BC7BE /* CloudSyncService.swift */; };
 		5C3AFF27DFE3C6CA126E76CF /* LibraryViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04B035A52DDF8C9621326315 /* LibraryViewModelTests.swift */; };
 		625A902BC3CBF529AB043346 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3222C06250928130D5D0CC70 /* SettingsView.swift */; };
 		63D1D1FBA2719BDB44C69D71 /* Log.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6639BC6A6667D6275C4A349 /* Log.swift */; };
@@ -107,6 +110,7 @@
 		2E0190DA172964B74D505CCC /* Format.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Format.swift; sourceTree = "<group>"; };
 		3222C06250928130D5D0CC70 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		323D04C68F2F6939F9A08D31 /* MediaLibraryViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaLibraryViewModelTests.swift; sourceTree = "<group>"; };
+		325D664144C99478B8838BE8 /* CloudSyncServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudSyncServiceTests.swift; sourceTree = "<group>"; };
 		32A983E19FE4F46B065E408D /* ClearPlay-macOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "ClearPlay-macOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		3E0EC39366947F67B0DFDC04 /* MediaGridView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaGridView.swift; sourceTree = "<group>"; };
 		4306E3456DC34F1953B20ED6 /* SubtitleService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubtitleService.swift; sourceTree = "<group>"; };
@@ -116,6 +120,7 @@
 		63A159B8B6D5E8827D88C47A /* ClearPlayTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ClearPlayTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		679D5A475C6C5ED8EB998C89 /* KeychainStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainStore.swift; sourceTree = "<group>"; };
 		7A120C0752E47168641FBC42 /* LibraryViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryViewModel.swift; sourceTree = "<group>"; };
+		7BD3599F0B21C7E5237BC7BE /* CloudSyncService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudSyncService.swift; sourceTree = "<group>"; };
 		8A5D3F7830C5B3FC0952B199 /* ShimmerModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShimmerModifier.swift; sourceTree = "<group>"; };
 		94840435DCFEDB87689C5776 /* FolderScannerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolderScannerTests.swift; sourceTree = "<group>"; };
 		953D168C15E9447556DABCF9 /* PosterCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PosterCard.swift; sourceTree = "<group>"; };
@@ -265,6 +270,7 @@
 		8F84035897C24BEE24807BCC /* ClearPlayTests */ = {
 			isa = PBXGroup;
 			children = (
+				325D664144C99478B8838BE8 /* CloudSyncServiceTests.swift */,
 				BF1E84E29E07363B9ECED881 /* FilenameParserTests.swift */,
 				94840435DCFEDB87689C5776 /* FolderScannerTests.swift */,
 				04B035A52DDF8C9621326315 /* LibraryViewModelTests.swift */,
@@ -282,6 +288,7 @@
 			isa = PBXGroup;
 			children = (
 				9AB1E96362AF8F934F947138 /* AppDatabase.swift */,
+				7BD3599F0B21C7E5237BC7BE /* CloudSyncService.swift */,
 				9611CEDBCD74E43EBCFF4CA1 /* FilenameParser.swift */,
 				96F92C781DA6BFD2ED0EE657 /* FolderScanner.swift */,
 				09F488490CDAA2064CDA371B /* PosterStore.swift */,
@@ -405,6 +412,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5B218849630C7C01FBF25B71 /* CloudSyncServiceTests.swift in Sources */,
 				48D9FD62234C6E488C6C59E2 /* FilenameParserTests.swift in Sources */,
 				0A65D3146335472BAB11AAE6 /* FolderScannerTests.swift in Sources */,
 				5C3AFF27DFE3C6CA126E76CF /* LibraryViewModelTests.swift in Sources */,
@@ -424,6 +432,7 @@
 				372F10672ACD8C4BB7D2845E /* AppDatabase.swift in Sources */,
 				E567E5BB05D58C3321613AA3 /* ArtworkImage.swift in Sources */,
 				13C45918E7CBD0DD2982CC1B /* ClearPlayApp.swift in Sources */,
+				5B5A498BD8538825DEF9DF46 /* CloudSyncService.swift in Sources */,
 				43DF68382882966461A76E9B /* ContentView.swift in Sources */,
 				1539EB2020EA802642368359 /* ContinueWatchingRow.swift in Sources */,
 				9C2EA38270BE69BE1BE726C2 /* FilenameParser.swift in Sources */,
@@ -464,6 +473,7 @@
 				04BEE7C06AB9B96E5E81108F /* AppDatabase.swift in Sources */,
 				9EA20598207A43463B5757C3 /* ArtworkImage.swift in Sources */,
 				C20C6CEB944695111A8A10FD /* ClearPlayApp.swift in Sources */,
+				0B8AC1A2A76B15E8824A427F /* CloudSyncService.swift in Sources */,
 				2126D8810E92B29013417FBD /* ContentView.swift in Sources */,
 				8696E112D39C4D65AB2A1CE5 /* ContinueWatchingRow.swift in Sources */,
 				E52135BAC4C364A2296E0AF4 /* FilenameParser.swift in Sources */,

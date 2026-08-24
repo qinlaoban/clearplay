@@ -24,6 +24,9 @@ targets:
       - ClearPlay
     dependencies:
       - package: AetherEngine
+    # 启用 iCloud 续播同步（需在 Xcode 配置签名 Team 后取消注释）：
+    # entitlements:
+    #   path: Support/ClearPlay.entitlements
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.clearplay.app.ios
@@ -39,6 +42,9 @@ targets:
       - ClearPlay
     dependencies:
       - package: AetherEngine
+    # 启用 iCloud 续播同步（需在 Xcode 配置签名 Team 后取消注释）：
+    # entitlements:
+    #   path: Support/ClearPlay.entitlements
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.clearplay.app.mac
