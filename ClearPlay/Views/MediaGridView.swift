@@ -101,10 +101,7 @@ struct MediaGridView: View {
                             spacing: 16
                         ) {
                             ForEach(items) { item in
-                                NavigationLink(value: item) {
-                                    PosterCard(item: item, onPlay: { play(item) })
-                                }
-                                .buttonStyle(.plain)
+                                PosterNavigationCard(item: item, onPlay: { play(item) })
                             }
                         }
                         .padding(CPMetrics.pad)

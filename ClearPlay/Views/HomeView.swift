@@ -79,10 +79,7 @@ struct HomeView: View {
     private func posterWall(_ items: [MediaItem]) -> some View {
         LazyVGrid(columns: [GridItem(.adaptive(minimum: 150), spacing: 16)], spacing: 16) {
             ForEach(items) { item in
-                NavigationLink(value: item) {
-                    PosterCard(item: item, onPlay: { play(item) })
-                }
-                .buttonStyle(.plain)
+                PosterNavigationCard(item: item, onPlay: { play(item) })
             }
         }
     }

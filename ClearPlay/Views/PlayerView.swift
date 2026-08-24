@@ -147,6 +147,8 @@ struct PlayerView: View {
             #endif
         }
         .opacity(controlsVisible ? 1 : 0)
+        // 隐藏时禁止命中，避免遮挡下层点击/手势
+        .allowsHitTesting(controlsVisible)
         .animation(.easeInOut(duration: 0.25), value: controlsVisible)
     }
 

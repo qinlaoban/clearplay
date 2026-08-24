@@ -1,11 +1,11 @@
 import SwiftUI
 
-/// 海报卡片：2:3 海报、hover 浮现播放钮（仅背景/阴影变化，无位移）、底部 3pt 进度条
+/// 海报卡片：2:3 海报、底部 3pt 进度条
+/// 注意：不要把本卡片包在 NavigationLink 里再叠加交互按钮（会同时触发导航与按钮）；
+/// 需要"点卡进详情 + hover 播放"请用 PosterNavigationCard。
 struct PosterCard: View {
     let item: MediaItem
     var width: CGFloat = 150
-    /// 播放按钮点击
-    var onPlay: () -> Void
 
     @State private var hovered = false
 
@@ -69,26 +69,6 @@ struct PosterCard: View {
                 .shadow(color: hovered ? .black.opacity(0.45) : .clear, radius: 10)
                 .animation(.easeInOut(duration: 0.2), value: hovered)
         )
-        .overlay(alignment: .center) {
-            playOverlay
-        }
-    }
-
-    private var playOverlay: some View {
-        Group {
-            if hovered {
-                Button(action: onPlay) {
-                    Image(systemName: "play.fill")
-                        .font(.system(size: 20, weight: .semibold))
-                        .foregroundStyle(.black)
-                        .frame(width: 44, height: 44)
-                        .background(Circle().fill(.cpCTA))
-                }
-                .buttonStyle(.plain)
-                .transition(.opacity)
-            }
-        }
-        .animation(.easeInOut(duration: 0.2), value: hovered)
     }
 
     private var progressFraction: CGFloat {
@@ -109,5 +89,40 @@ struct PosterCard: View {
         } else {
             Text("未刮削")
         }
+    }
+}
+
+/// 点卡片进详情 + hover 浮现播放钮的组合单元：
+/// 播放钮在 NavigationLink 外层（ZStack），点击不会同时触发导航
+struct PosterNavigationCard: View {
+    let item: MediaItem
+    var onPlay: () -> Void
+
+    @State private var hovered = false
+
+    var body: some View {
+        ZStack {
+            NavigationLink(value: item) {
+                PosterCard(item: item)
+            }
+            .buttonStyle(.plain)
+
+            if hovered {
+                Button(action: onPlay) {
+                    Image(systemName: "play.fill")
+                        .font(.system(size: 20, weight: .semibold))
+                        .foregroundStyle(.black)
+                        .frame(width: 44, height: 44)
+                        .background(Circle().fill(.cpCTA))
+                }
+                .buttonStyle(.plain)
+                .transition(.opacity)
+                .help("播放")
+            }
+        }
+        #if os(macOS)
+        .onHover { hovered = $0 }
+        #endif
+        .animation(.easeInOut(duration: 0.2), value: hovered)
     }
 }
