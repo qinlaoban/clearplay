@@ -38,10 +38,6 @@ struct ContentView: View {
         }
         .cpTheme()
         .background(.cpBackground)
-        // 海报/详情页导航目标
-        .navigationDestination(for: MediaItem.self) { item in
-            MediaDetailView(item: item)
-        }
         .fileImporter(
             isPresented: $showFolderImporter,
             allowedContentTypes: [.folder],
@@ -108,12 +104,21 @@ struct ContentView: View {
 
     @ViewBuilder
     private var detail: some View {
-        switch section {
-        case .home, nil: HomeView()
-        case .movies: MediaGridView(kind: .movie, title: "电影")
-        case .shows: MediaGridView(kind: .episode, title: "剧集")
-        case .favorites: MediaGridView(favoritesOnly: true)
-        case .settings: SettingsView()
+        NavigationStack {
+            Group {
+                switch section {
+                case .home, nil: HomeView()
+                case .movies: MediaGridView(kind: .movie, title: "电影")
+                case .shows: MediaGridView(kind: .episode, title: "剧集")
+                case .favorites: MediaGridView(favoritesOnly: true)
+                case .settings: SettingsView()
+                }
+            }
+            // 海报/详情页导航目标（必须在 NavigationStack 内）
+            .navigationDestination(for: MediaItem.self) { item in
+                MediaDetailView(item: item)
+            }
         }
+        .id(section) // 切换分区时重置导航栈
     }
 }
